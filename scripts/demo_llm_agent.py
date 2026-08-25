@@ -1,10 +1,13 @@
 """Run a bounded live or mocked LLM smoke experiment."""
 
 import argparse
+from collections.abc import Sequence
 
 from epistemic_repair import (
     DEFAULT_MODEL_ID,
     DeterministicMockLLMClient,
+    FailureMode,
+    HYPOTHESES,
     LLMCondition,
     LLMConfig,
     LLMConfigurationError,
@@ -13,12 +16,35 @@ from epistemic_repair import (
 )
 
 
-def parse_args() -> argparse.Namespace:
+FAILURE_SELECTIONS: dict[str, tuple[FailureMode, ...]] = {
+    "world_shift": (FailureMode.WORLD_SHIFT,),
+    "sensor_corruption": (FailureMode.SENSOR_CORRUPTION,),
+    "missing_latent_variable": (FailureMode.MISSING_LATENT_VARIABLE,),
+    "all": HYPOTHESES,
+}
+
+
+def selected_failure_modes(selection: str) -> tuple[FailureMode, ...]:
+    """Return the failure modes selected by a CLI value."""
+    return FAILURE_SELECTIONS[selection]
+
+
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse provider, model, condition, and call-control configuration."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--provider", default="gemini", choices=("gemini",))
     parser.add_argument("--model", default=DEFAULT_MODEL_ID)
     parser.add_argument("--condition", choices=("full", "planner", "both"), default="both")
+    parser.add_argument(
+        "--failure",
+        choices=(
+            "world_shift",
+            "sensor_corruption",
+            "missing_latent_variable",
+            "all",
+        ),
+        default="all",
+    )
     parser.add_argument("--budget", type=int, default=2)
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--thinking-level", default="medium")
@@ -32,7 +58,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Use a deterministic no-network client and require no API key.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def main() -> None:
@@ -55,11 +81,13 @@ def main() -> None:
             LLMCondition.PLANNER_ONLY,
         ),
     }[args.condition]
-    episode_count = 3 * args.repetitions * len(conditions)
+    failure_modes = selected_failure_modes(args.failure)
+    episode_count = len(failure_modes) * args.repetitions * len(conditions)
 
     print(f"provider: {config.provider}{' (mocked transport)' if args.mock else ''}")
     print(f"model: {config.model_id}")
     print(f"condition: {args.condition}")
+    print(f"failure: {args.failure}")
     print(f"budget: {args.budget}")
     print(f"number of episodes: {episode_count}")
 
@@ -75,6 +103,7 @@ def main() -> None:
         repetitions=args.repetitions,
         experiment_budget=args.budget,
         base_episode_seed=args.seed,
+        failure_modes=failure_modes,
     )
     for condition_result in results:
         print(f"\n{condition_result.condition.value}")

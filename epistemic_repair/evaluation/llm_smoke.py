@@ -9,6 +9,7 @@ from epistemic_repair.evaluation.llm_metrics import (
     summarize_llm_results,
 )
 from epistemic_repair.evaluation.llm_runner import LLMEpisodeResult, LLMEpisodeRunner
+from epistemic_repair.failures.modes import FailureMode
 from epistemic_repair.llm.base import LLMClient
 from epistemic_repair.llm.config import LLMConfig
 from epistemic_repair.llm.schemas import LLMCondition
@@ -38,8 +39,9 @@ def run_llm_smoke(
     repetitions: int = 3,
     experiment_budget: int = 2,
     base_episode_seed: int = 0,
+    failure_modes: tuple[FailureMode, ...] = HYPOTHESES,
 ) -> tuple[LLMSmokeResult, ...]:
-    """Run a deliberately small 3-mode smoke experiment without pooling modes."""
+    """Run a deliberately small smoke experiment without pooling conditions."""
     if type(repetitions) is not int or repetitions <= 0:
         raise ValueError("repetitions must be a positive integer")
     smoke_results = []
@@ -51,7 +53,7 @@ def run_llm_smoke(
             else PlannerOnlyLLMPolicy(client, config)
         )
         episodes = []
-        for hypothesis in HYPOTHESES:
+        for hypothesis in failure_modes:
             for _ in range(repetitions):
                 runner = LLMEpisodeRunner(
                     condition=condition,
@@ -69,4 +71,3 @@ def run_llm_smoke(
             )
         )
     return tuple(smoke_results)
-
