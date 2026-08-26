@@ -33,6 +33,7 @@ class GeminiLLMClient(LLMClient):
         self._api_key = api_key or require_gemini_api_key(dotenv_path=dotenv_path)
         if sdk_client is not None:
             self._client = sdk_client
+            self._require_interactions_api()
             return
 
         try:
@@ -53,31 +54,44 @@ class GeminiLLMClient(LLMClient):
             api_key=self._api_key,
             http_options=http_options,
         )
+        self._require_interactions_api()
+
+    def _require_interactions_api(self) -> None:
+        interactions = getattr(self._client, "interactions", None)
+        if not callable(getattr(interactions, "create", None)):
+            raise LLMConfigurationError(
+                "Gemini structured output requires the Interactions API from "
+                "google-genai>=2.3.0. Upgrade the Gemini optional dependency."
+            )
 
     def generate(self, request: LLMRequest) -> LLMResponse:
         """Generate strict JSON without tools, routing, or sampling parameters."""
-        generation_config = {
-            "response_mime_type": "application/json",
-            "response_json_schema": dict(request.response_schema),
-            "max_output_tokens": self.config.max_output_tokens,
-            "thinking_config": {
+        call: dict[str, Any] = {
+            "model": self.config.model_id,
+            "input": request.prompt,
+            "response_format": {
+                "type": "text",
+                "mime_type": "application/json",
+                "schema": dict(request.response_schema),
+            },
+            "generation_config": {
                 "thinking_level": self.config.thinking_level,
-                "include_thoughts": False,
+                "thinking_summaries": "none",
+                "max_output_tokens": self.config.max_output_tokens,
             },
         }
+        if self.config.request_timeout_seconds is not None:
+            call["timeout"] = self.config.request_timeout_seconds
+
         try:
-            response = self._client.models.generate_content(
-                model=self.config.model_id,
-                contents=request.prompt,
-                config=generation_config,
-            )
+            response = self._client.interactions.create(**call)
         except Exception as error:  # Provider classes are lazy/optional.
             raise self._classify_provider_error(error) from error
 
-        text = getattr(response, "text", None)
+        text = getattr(response, "output_text", None)
         if not isinstance(text, str) or not text.strip():
             raise LLMFormatError("Gemini returned an empty structured response")
-        request_id = getattr(response, "response_id", None)
+        request_id = getattr(response, "id", None)
         if request_id is not None and not isinstance(request_id, str):
             request_id = str(request_id)
         return LLMResponse(text=text, provider_request_id=request_id)
@@ -86,6 +100,8 @@ class GeminiLLMClient(LLMClient):
     def _classify_provider_error(error: Exception) -> Exception:
         """Map SDK errors into stable provider-neutral failure categories."""
         code = getattr(error, "code", None)
+        if code is None:
+            code = getattr(error, "status_code", None)
         name = type(error).__name__.lower()
         message = str(error) or type(error).__name__
         if code == 429:
@@ -102,4 +118,3 @@ class GeminiLLMClient(LLMClient):
                 f"and provider availability: {message}"
             )
         return LLMProviderError(f"Gemini API failure: {message}")
-

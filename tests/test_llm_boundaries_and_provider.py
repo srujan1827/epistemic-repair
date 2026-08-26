@@ -23,11 +23,14 @@ from epistemic_repair import (
     LLMConfig,
     LLMConfigurationError,
     LLMEpisodeRunner,
+    LLMFormatError,
     LLMProviderError,
     LLMRateLimitError,
     LLMRequest,
     LLMResponse,
     LLMTimeoutError,
+    LLMTransientError,
+    LLMAttemptStatus,
     Observation,
     OraclePolicyView,
     PlannerOnlyLLMPolicy,
@@ -200,13 +203,17 @@ def test_invalid_llm_configuration_is_rejected(kwargs: dict[str, object]) -> Non
         LLMConfig(**kwargs)  # type: ignore[arg-type]
 
 
-class FakeSDKModels:
-    def __init__(self, response: object = None, error: Exception | None = None) -> None:
+class FakeSDKInteractions:
+    def __init__(
+        self,
+        response: object = None,
+        error: Exception | None = None,
+    ) -> None:
         self.response = response
         self.error = error
         self.calls: list[dict[str, object]] = []
 
-    def generate_content(self, **kwargs: object) -> object:
+    def create(self, **kwargs: object) -> object:
         self.calls.append(kwargs)
         if self.error is not None:
             raise self.error
@@ -214,47 +221,112 @@ class FakeSDKModels:
 
 
 class FakeSDKClient:
-    def __init__(self, models: FakeSDKModels) -> None:
-        self.models = models
+    def __init__(self, interactions: FakeSDKInteractions) -> None:
+        self.interactions = interactions
 
 
 class FakeSDKResponse:
-    text = '{"decision":"DIAGNOSE"}'
-    response_id = "gemini-fake-id"
+    output_text = '{"decision":"DIAGNOSE"}'
+    id = "gemini-fake-id"
 
 
 def test_gemini_adapter_uses_configured_model_schema_and_no_tools() -> None:
-    models = FakeSDKModels(response=FakeSDKResponse())
+    interactions = FakeSDKInteractions(response=FakeSDKResponse())
     config = LLMConfig(model_id="named-test-model", thinking_level="high")
     client = GeminiLLMClient(
         config,
         api_key="test-only-key",
-        sdk_client=FakeSDKClient(models),
+        sdk_client=FakeSDKClient(interactions),
     )
 
     response = client.generate(
         LLMRequest(prompt="safe prompt", response_schema={"type": "object"})
     )
 
-    call = models.calls[0]
-    assert call["model"] == "named-test-model"
-    assert call["contents"] == "safe prompt"
-    assert "tools" not in call
-    generation = call["config"]
-    assert isinstance(generation, dict)
-    assert generation["max_output_tokens"] == config.max_output_tokens
-    assert generation["thinking_config"] == {
-        "thinking_level": "high",
-        "include_thoughts": False,
-    }
+    assert interactions.calls == [
+        {
+            "model": "named-test-model",
+            "input": "safe prompt",
+            "response_format": {
+                "type": "text",
+                "mime_type": "application/json",
+                "schema": {"type": "object"},
+            },
+            "generation_config": {
+                "thinking_level": "high",
+                "thinking_summaries": "none",
+                "max_output_tokens": config.max_output_tokens,
+            },
+            "timeout": config.request_timeout_seconds,
+        }
+    ]
+    assert "tools" not in interactions.calls[0]
+    assert "contents" not in interactions.calls[0]
+    assert "config" not in interactions.calls[0]
+    assert response.text == '{"decision":"DIAGNOSE"}'
     assert response.provider_request_id == "gemini-fake-id"
+
+
+def test_gemini_adapter_uses_only_official_interaction_output_text() -> None:
+    class LegacyOnlyResponse:
+        text = '{"decision":"DIAGNOSE"}'
+        id = "gemini-fake-id"
+
+    client = GeminiLLMClient(
+        LLMConfig(),
+        api_key="test-only-key",
+        sdk_client=FakeSDKClient(
+            FakeSDKInteractions(response=LegacyOnlyResponse())
+        ),
+    )
+
+    with pytest.raises(LLMFormatError, match="empty structured response"):
+        client.generate(LLMRequest("prompt", {"type": "object"}))
+
+
+def test_gemini_adapter_requires_current_interactions_sdk() -> None:
+    with pytest.raises(LLMConfigurationError, match="google-genai>=2.3.0"):
+        GeminiLLMClient(
+            LLMConfig(),
+            api_key="test-only-key",
+            sdk_client=object(),
+        )
+
+
+def test_prose_prefixed_json_remains_strictly_rejected() -> None:
+    client = RecordingClient(
+        "Here is the JSON requested:\n" + _full_diagnosis()
+    )
+    result = FullAutonomousLLMPolicy(
+        client,
+        LLMConfig(max_retries=0),
+    ).decide(_initial_view())
+
+    assert result.decision is None
+    assert result.attempts[0].status is LLMAttemptStatus.INVALID_FORMAT
+    assert result.attempts[0].raw_output == (
+        "Here is the JSON requested:\n" + _full_diagnosis()
+    )
+
+
+def test_gemini_adapter_omits_per_call_timeout_when_unconfigured() -> None:
+    interactions = FakeSDKInteractions(response=FakeSDKResponse())
+    client = GeminiLLMClient(
+        LLMConfig(request_timeout_seconds=None),
+        api_key="test-only-key",
+        sdk_client=FakeSDKClient(interactions),
+    )
+
+    client.generate(LLMRequest("prompt", {"type": "object"}))
+
+    assert "timeout" not in interactions.calls[0]
 
 
 def test_gemini_adapter_maps_timeout_without_network() -> None:
     client = GeminiLLMClient(
         LLMConfig(),
         api_key="test-only-key",
-        sdk_client=FakeSDKClient(FakeSDKModels(error=TimeoutError("slow"))),
+        sdk_client=FakeSDKClient(FakeSDKInteractions(error=TimeoutError("slow"))),
     )
 
     with pytest.raises(LLMTimeoutError, match="timed out"):
@@ -263,12 +335,14 @@ def test_gemini_adapter_maps_timeout_without_network() -> None:
 
 def test_unknown_provider_error_never_falls_back() -> None:
     class BadRequest(Exception):
-        code = 404
+        status_code = 404
 
     client = GeminiLLMClient(
         LLMConfig(model_id="unavailable-model"),
         api_key="test-only-key",
-        sdk_client=FakeSDKClient(FakeSDKModels(error=BadRequest("not found"))),
+        sdk_client=FakeSDKClient(
+            FakeSDKInteractions(error=BadRequest("not found"))
+        ),
     )
 
     with pytest.raises(LLMProviderError, match="model_id"):
@@ -277,15 +351,33 @@ def test_unknown_provider_error_never_falls_back() -> None:
 
 def test_gemini_rate_limit_is_reported_without_fallback() -> None:
     class RateLimited(Exception):
-        code = 429
+        status_code = 429
 
     client = GeminiLLMClient(
         LLMConfig(),
         api_key="test-only-key",
-        sdk_client=FakeSDKClient(FakeSDKModels(error=RateLimited("quota"))),
+        sdk_client=FakeSDKClient(
+            FakeSDKInteractions(error=RateLimited("quota"))
+        ),
     )
 
     with pytest.raises(LLMRateLimitError, match="rate limit"):
+        client.generate(LLMRequest("prompt", {"type": "object"}))
+
+
+def test_gemini_server_error_remains_transient() -> None:
+    class ServiceUnavailable(Exception):
+        status_code = 503
+
+    client = GeminiLLMClient(
+        LLMConfig(),
+        api_key="test-only-key",
+        sdk_client=FakeSDKClient(
+            FakeSDKInteractions(error=ServiceUnavailable("unavailable"))
+        ),
+    )
+
+    with pytest.raises(LLMTransientError, match="Transient Gemini"):
         client.generate(LLMRequest("prompt", {"type": "object"}))
 
 
