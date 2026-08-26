@@ -12,17 +12,23 @@ from epistemic_repair import (
     parse_full_autonomous_response,
     parse_planner_only_response,
 )
+from epistemic_repair.llm.schemas import (
+    full_autonomous_json_schema,
+    planner_only_json_schema,
+)
 
 
 def _full_payload(**overrides: object) -> str:
     payload = {
         "decision": "RUN_EXPERIMENT",
         "action": "USE_TRUSTED_SENSOR",
+        "diagnosis": None,
         "beliefs": {
             "WORLD_SHIFT": 1 / 3,
             "SENSOR_CORRUPTION": 1 / 3,
             "MISSING_LATENT_VARIABLE": 1 / 3,
         },
+        "confidence": None,
         "reason_summary": "A trusted measurement will provide useful evidence.",
     }
     payload.update(overrides)
@@ -35,6 +41,31 @@ def test_valid_full_autonomous_run_experiment_parses() -> None:
     assert decision.decision is DecisionType.RUN_EXPERIMENT
     assert decision.action is DiagnosticAction.USE_TRUSTED_SENSOR
     assert decision.diagnosis is None
+
+
+def test_provider_schemas_require_complete_structural_envelopes() -> None:
+    full_schema = full_autonomous_json_schema()
+    planner_schema = planner_only_json_schema()
+
+    assert full_schema["required"] == [
+        "decision",
+        "action",
+        "diagnosis",
+        "beliefs",
+        "confidence",
+        "reason_summary",
+    ]
+    assert planner_schema["required"] == [
+        "decision",
+        "action",
+        "diagnosis",
+        "reason_summary",
+    ]
+    assert full_schema["properties"]["action"]["type"] == ["string", "null"]
+    assert full_schema["properties"]["diagnosis"]["type"] == ["string", "null"]
+    assert full_schema["properties"]["confidence"]["type"] == ["number", "null"]
+    assert planner_schema["properties"]["action"]["type"] == ["string", "null"]
+    assert planner_schema["properties"]["diagnosis"]["type"] == ["string", "null"]
 
 
 def test_valid_full_autonomous_diagnosis_parses() -> None:
@@ -64,6 +95,7 @@ def test_valid_full_autonomous_diagnosis_parses() -> None:
             {
                 "decision": "RUN_EXPERIMENT",
                 "action": "CHANGE_CONTEXT",
+                "diagnosis": None,
                 "reason_summary": "Test context sensitivity.",
             },
             DiagnosticAction.CHANGE_CONTEXT,
@@ -71,6 +103,7 @@ def test_valid_full_autonomous_diagnosis_parses() -> None:
         (
             {
                 "decision": "DIAGNOSE",
+                "action": None,
                 "diagnosis": "WORLD_SHIFT",
                 "reason_summary": "The evidence is decisive.",
             },
@@ -100,6 +133,7 @@ def test_invalid_diagnosis_label_is_rejected() -> None:
             json.dumps(
                 {
                     "decision": "DIAGNOSE",
+                    "action": None,
                     "diagnosis": "NORMAL",
                     "reason_summary": "Done.",
                 }
@@ -141,6 +175,48 @@ def test_empty_or_malformed_responses_are_rejected(text: str) -> None:
         parse_planner_only_response(text)
 
 
+def test_truncated_json_is_rejected_without_repair() -> None:
+    with pytest.raises(StructuredResponseError, match="not valid JSON"):
+        parse_full_autonomous_response('{"decision":"RUN_EXPERIMENT"')
+
+
+def test_run_experiment_with_missing_action_is_rejected() -> None:
+    payload = json.loads(_full_payload())
+    payload.pop("action")
+
+    with pytest.raises(StructuredResponseError, match="action"):
+        parse_full_autonomous_response(json.dumps(payload))
+
+
+def test_diagnose_with_missing_diagnosis_is_rejected() -> None:
+    payload = json.loads(
+        _full_payload(decision="DIAGNOSE", action=None, confidence=0.9)
+    )
+    payload.pop("diagnosis")
+
+    with pytest.raises(StructuredResponseError, match="diagnosis"):
+        parse_full_autonomous_response(json.dumps(payload))
+
+
+@pytest.mark.parametrize("omit_confidence", (False, True))
+def test_diagnose_with_null_or_missing_confidence_is_rejected(
+    omit_confidence: bool,
+) -> None:
+    payload = json.loads(
+        _full_payload(
+            decision="DIAGNOSE",
+            action=None,
+            diagnosis="WORLD_SHIFT",
+            confidence=None,
+        )
+    )
+    if omit_confidence:
+        payload.pop("confidence")
+
+    with pytest.raises(StructuredResponseError, match="confidence"):
+        parse_full_autonomous_response(json.dumps(payload))
+
+
 @pytest.mark.parametrize(
     "overrides",
     [
@@ -163,9 +239,9 @@ def test_arbitrary_code_field_is_rejected() -> None:
                 {
                     "decision": "RUN_EXPERIMENT",
                     "action": "REPEAT_TRIAL",
+                    "diagnosis": None,
                     "reason_summary": "Try again.",
                     "python": "import os; os.system('whoami')",
                 }
             )
         )
-

@@ -125,6 +125,11 @@ or issue one of the three diagnoses. Malformed JSON, invalid probabilities,
 unsupported actions, contradictory fields, timeouts, rate limits, and provider
 errors are recorded explicitly rather than guessed around.
 
+Provider schemas require a stable structural envelope with nullable
+branch-specific fields. The strict Python parser remains responsible for
+decision-dependent semantics, such as requiring an action only for
+`RUN_EXPERIMENT` and a diagnosis (plus autonomous confidence) for `DIAGNOSE`.
+
 ### Provider architecture
 
 Benchmark code depends only on `LLMClient.generate(LLMRequest)`. The sole real
@@ -138,6 +143,10 @@ structured JSON output, supplies no tools, requests no thought summaries, and
 does not send deprecated sampling settings. See the official
 [Gemini 3.7 Flash documentation](https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash)
 and [structured-output guide](https://ai.google.dev/gemini-api/docs/structured-output).
+
+Structured LLM responses default to `1024` maximum output tokens. Live Gemini
+smoke testing showed that `256` could truncate the autonomous response
+envelope; the limit remains configurable with `--max-output-tokens`.
 
 Automatic free-model routing is unsuitable for these experiments because a
 different underlying model between requests would invalidate attribution and

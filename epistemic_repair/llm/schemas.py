@@ -86,7 +86,14 @@ def full_autonomous_json_schema() -> dict[str, Any]:
             "confidence": {"type": ["number", "null"], "minimum": 0.0, "maximum": 1.0},
             "reason_summary": {"type": "string", "maxLength": 600},
         },
-        "required": ["decision", "beliefs", "reason_summary"],
+        "required": [
+            "decision",
+            "action",
+            "diagnosis",
+            "beliefs",
+            "confidence",
+            "reason_summary",
+        ],
     }
 
 
@@ -104,7 +111,7 @@ def planner_only_json_schema() -> dict[str, Any]:
             },
             "reason_summary": {"type": "string", "maxLength": 600},
         },
-        "required": ["decision", "reason_summary"],
+        "required": ["decision", "action", "diagnosis", "reason_summary"],
     }
 
 
@@ -248,4 +255,3 @@ def _parse_reason(data: Mapping[str, Any]) -> str:
     if len(reason) > 600:
         raise StructuredResponseError("reason_summary exceeds 600 characters")
     return reason
-

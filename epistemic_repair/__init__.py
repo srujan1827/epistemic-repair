@@ -64,6 +64,7 @@ from epistemic_repair.policies import (
     RandomDiagnosticPolicy,
 )
 from epistemic_repair.llm import (
+    DEFAULT_MAX_OUTPUT_TOKENS,
     DEFAULT_MODEL_ID,
     DecisionType,
     DeterministicMockLLMClient,
@@ -109,6 +110,7 @@ __all__ = [
     "DiagnosticEpisodeRunner",
     "DiagnosticPolicy",
     "DiagnosticTraceStep",
+    "DEFAULT_MAX_OUTPUT_TOKENS",
     "DEFAULT_MODEL_ID",
     "DecisionType",
     "DeterministicMockLLMClient",

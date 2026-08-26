@@ -9,6 +9,7 @@ from epistemic_repair.llm.base import LLMConfigurationError
 
 
 DEFAULT_MODEL_ID = "gemini-3.7-flash"
+DEFAULT_MAX_OUTPUT_TOKENS = 1024
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,7 +19,7 @@ class LLMConfig:
     provider: str = "gemini"
     model_id: str = DEFAULT_MODEL_ID
     thinking_level: str = "medium"
-    max_output_tokens: int = 512
+    max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS
     request_timeout_seconds: float | None = 60.0
     max_retries: int = 1
     max_decision_calls: int = 4
@@ -83,4 +84,3 @@ def require_gemini_api_key(
             "Set it in the shell or a gitignored local .env file."
         )
     return api_key
-

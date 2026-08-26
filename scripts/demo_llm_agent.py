@@ -4,6 +4,7 @@ import argparse
 from collections.abc import Sequence
 
 from epistemic_repair import (
+    DEFAULT_MAX_OUTPUT_TOKENS,
     DEFAULT_MODEL_ID,
     DeterministicMockLLMClient,
     FailureMode,
@@ -50,7 +51,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--budget", type=int, default=2)
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--thinking-level", default="medium")
-    parser.add_argument("--max-output-tokens", type=int, default=512)
+    parser.add_argument(
+        "--max-output-tokens",
+        type=int,
+        default=DEFAULT_MAX_OUTPUT_TOKENS,
+    )
     parser.add_argument("--timeout", type=float, default=60.0)
     parser.add_argument("--max-retries", type=int, default=1)
     parser.add_argument("--max-decision-calls", type=int, default=4)

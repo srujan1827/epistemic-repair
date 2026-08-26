@@ -48,16 +48,19 @@ def _experiment(
     result: dict[str, object] = {
         "decision": "RUN_EXPERIMENT",
         "action": action,
+        "diagnosis": None,
         "reason_summary": "This safe diagnostic should reduce the remaining ambiguity.",
     }
     if not planner_only:
         result["beliefs"] = _beliefs(*beliefs)
+        result["confidence"] = None
     return result
 
 
 def _diagnosis(label: str, planner_only: bool) -> dict[str, object]:
     result: dict[str, object] = {
         "decision": "DIAGNOSE",
+        "action": None,
         "diagnosis": label,
         "reason_summary": "The safe experiment history now supports one explanation.",
     }
@@ -80,4 +83,3 @@ def _beliefs(world: float, sensor: float, latent: float) -> dict[str, float]:
         "SENSOR_CORRUPTION": sensor,
         "MISSING_LATENT_VARIABLE": latent,
     }
-

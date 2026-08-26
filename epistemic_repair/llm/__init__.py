@@ -13,6 +13,7 @@ from epistemic_repair.llm.base import (
     LLMTransientError,
 )
 from epistemic_repair.llm.config import (
+    DEFAULT_MAX_OUTPUT_TOKENS,
     DEFAULT_MODEL_ID,
     LLMConfig,
     load_dotenv_if_present,
@@ -44,6 +45,7 @@ def create_llm_client(config: LLMConfig) -> LLMClient:
 
 
 __all__ = [
+    "DEFAULT_MAX_OUTPUT_TOKENS",
     "DEFAULT_MODEL_ID",
     "DecisionType",
     "DeterministicMockLLMClient",

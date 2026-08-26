@@ -74,6 +74,12 @@ def test_verbose_attempts_is_optional() -> None:
     assert parse_args(["--verbose-attempts"]).verbose_attempts
 
 
+def test_output_token_default_and_explicit_override() -> None:
+    assert LLMConfig().max_output_tokens == 1024
+    assert parse_args([]).max_output_tokens == 1024
+    assert parse_args(["--max-output-tokens", "256"]).max_output_tokens == 256
+
+
 @pytest.mark.parametrize(
     "conditions",
     (
