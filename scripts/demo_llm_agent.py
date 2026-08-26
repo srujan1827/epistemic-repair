@@ -11,9 +11,11 @@ from epistemic_repair import (
     LLMCondition,
     LLMConfig,
     LLMConfigurationError,
+    LLMEpisodeResult,
     create_llm_client,
     run_llm_smoke,
 )
+from epistemic_repair.llm.sanitize import sanitize_text
 
 
 FAILURE_SELECTIONS: dict[str, tuple[FailureMode, ...]] = {
@@ -54,11 +56,50 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-decision-calls", type=int, default=4)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument(
+        "--verbose-attempts",
+        action="store_true",
+        help="Print sanitized LLM attempt details for successful episodes too.",
+    )
+    parser.add_argument(
         "--mock",
         action="store_true",
         help="Use a deterministic no-network client and require no API key.",
     )
     return parser.parse_args(argv)
+
+
+def print_attempt_history(
+    episode: LLMEpisodeResult,
+    *,
+    verbose: bool = False,
+) -> None:
+    """Print stored sanitized attempts for failures, or all episodes if verbose."""
+    if episode.final_diagnosis is not None and not verbose:
+        return
+
+    print(f"    termination_reason={episode.termination_reason.value}")
+    for turn in episode.trace:
+        for attempt in turn.policy_result.attempts:
+            error_type = attempt.error_type or "NONE"
+            error_message = (
+                repr(sanitize_text(attempt.error_message))
+                if attempt.error_message is not None
+                else "NONE"
+            )
+            print(
+                f"    call_number={turn.call_number} "
+                f"attempt_number={attempt.attempt_number} "
+                f"status={attempt.status.value}"
+            )
+            print(f"      error_type={error_type}")
+            print(f"      error_message={error_message}")
+            if attempt.raw_output is not None:
+                print(f"      raw_output={sanitize_text(attempt.raw_output)!r}")
+            if attempt.provider_request_id is not None:
+                print(
+                    "      provider_request_id="
+                    f"{sanitize_text(attempt.provider_request_id)}"
+                )
 
 
 def main() -> None:
@@ -127,6 +168,7 @@ def main() -> None:
                 f"regret={episode.cumulative_action_regret:.6f} "
                 f"retries={episode.total_retries}"
             )
+            print_attempt_history(episode, verbose=args.verbose_attempts)
         summary = condition_result.summary
         print(
             f"  aggregate: accuracy={summary.diagnosis_accuracy:.3f} "
