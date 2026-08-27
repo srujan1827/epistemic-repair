@@ -329,6 +329,18 @@ confusion-matrix JSON, representative hard-case JSON, and a Markdown report.
 The calibration implementation contains no LLM/provider calls and makes no
 network requests.
 
+An experiment-only staged parameter search can evaluate possible ER-1 V2
+generative constants without modifying the active V1 configuration:
+
+```bash
+python -m scripts.search_er1_parameters
+```
+
+It first screens ordinary no-change noise, then modest structural contrasts,
+and finally runs the full calibration grid for the top three candidates plus
+V1 when needed. Candidate parameters, likelihoods, and environments remain
+isolated from `epistemic_repair/er1/config.py`.
+
 ## Policies and evaluation
 
 `OracleInformationGainPolicy` chooses the action with maximum expected
