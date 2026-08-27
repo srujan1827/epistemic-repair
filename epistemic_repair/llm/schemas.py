@@ -7,6 +7,7 @@ from math import isfinite
 from typing import Any, Mapping, TypeAlias
 
 from epistemic_repair.beliefs.state import HypothesisBeliefs
+from epistemic_repair.beliefs.stochastic_state import StochasticHypothesisBeliefs
 from epistemic_repair.diagnostics.actions import BENCHMARK_ACTIONS, DiagnosticAction
 from epistemic_repair.failures.modes import FailureMode
 
@@ -51,7 +52,36 @@ class PlannerOnlyDecision:
     diagnosis: FailureMode | None = None
 
 
-LLMDecision: TypeAlias = FullAutonomousDecision | PlannerOnlyDecision
+@dataclass(frozen=True, slots=True)
+class ER1FullAutonomousDecision:
+    """Validated ER-1 autonomous decision with four stated beliefs."""
+
+    decision: DecisionType
+    beliefs: StochasticHypothesisBeliefs
+    reason_summary: str
+    action: DiagnosticAction | None = None
+    diagnosis: FailureMode | None = None
+    confidence: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ER1PlannerOnlyDecision:
+    """Validated ER-1 planner decision using authoritative external beliefs."""
+
+    decision: DecisionType
+    reason_summary: str
+    action: DiagnosticAction | None = None
+    diagnosis: FailureMode | None = None
+
+
+ER1LLMDecision: TypeAlias = ER1FullAutonomousDecision | ER1PlannerOnlyDecision
+
+
+LLMDecision: TypeAlias = (
+    FullAutonomousDecision
+    | PlannerOnlyDecision
+    | ER1LLMDecision
+)
 
 
 _HYPOTHESIS_NAMES = tuple(hypothesis.value for hypothesis in (
@@ -60,6 +90,10 @@ _HYPOTHESIS_NAMES = tuple(hypothesis.value for hypothesis in (
     FailureMode.MISSING_LATENT_VARIABLE,
 ))
 _ACTION_NAMES = tuple(action.value for action in BENCHMARK_ACTIONS)
+_ER1_HYPOTHESIS_NAMES = (
+    FailureMode.NO_STRUCTURAL_CHANGE.value,
+    *_HYPOTHESIS_NAMES,
+)
 
 
 def full_autonomous_json_schema() -> dict[str, Any]:
@@ -112,6 +146,62 @@ def planner_only_json_schema() -> dict[str, Any]:
             "reason_summary": {"type": "string", "maxLength": 600},
         },
         "required": ["decision", "action", "diagnosis", "reason_summary"],
+    }
+
+
+def er1_full_autonomous_json_schema() -> dict[str, Any]:
+    """Return provider-neutral structural schema for ER-1 autonomous decisions."""
+    return _decision_schema(
+        hypothesis_names=_ER1_HYPOTHESIS_NAMES,
+        include_beliefs=True,
+    )
+
+
+def er1_planner_only_json_schema() -> dict[str, Any]:
+    """Return provider-neutral structural schema for ER-1 planner decisions."""
+    return _decision_schema(
+        hypothesis_names=_ER1_HYPOTHESIS_NAMES,
+        include_beliefs=False,
+    )
+
+
+def _decision_schema(
+    *,
+    hypothesis_names: tuple[str, ...],
+    include_beliefs: bool,
+) -> dict[str, Any]:
+    properties: dict[str, Any] = {
+        "decision": {"type": "string", "enum": [item.value for item in DecisionType]},
+        "action": {"type": ["string", "null"], "enum": [*_ACTION_NAMES, None]},
+        "diagnosis": {
+            "type": ["string", "null"],
+            "enum": [*hypothesis_names, None],
+        },
+        "reason_summary": {"type": "string", "maxLength": 600},
+    }
+    required = ["decision", "action", "diagnosis"]
+    if include_beliefs:
+        properties["beliefs"] = {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                name: {"type": "number", "minimum": 0.0, "maximum": 1.0}
+                for name in hypothesis_names
+            },
+            "required": list(hypothesis_names),
+        }
+        properties["confidence"] = {
+            "type": ["number", "null"],
+            "minimum": 0.0,
+            "maximum": 1.0,
+        }
+        required.extend(("beliefs", "confidence"))
+    required.append("reason_summary")
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": properties,
+        "required": required,
     }
 
 
@@ -182,6 +272,63 @@ def parse_planner_only_response(text: str) -> PlannerOnlyDecision:
     )
 
 
+def parse_er1_full_autonomous_response(text: str) -> ER1FullAutonomousDecision:
+    """Strictly parse a four-hypothesis ER-1 autonomous decision."""
+    data = _parse_object(text)
+    _reject_extra_fields(
+        data,
+        {"decision", "action", "diagnosis", "beliefs", "confidence", "reason_summary"},
+    )
+    decision = _parse_decision_type(data)
+    beliefs_data = data.get("beliefs")
+    if not isinstance(beliefs_data, Mapping):
+        raise StructuredResponseError("beliefs must be an object")
+    if set(beliefs_data) != set(_ER1_HYPOTHESIS_NAMES):
+        raise StructuredResponseError("beliefs must contain exactly four hypotheses")
+    parsed_weights = {
+        hypothesis: _strict_probability(
+            beliefs_data[hypothesis.value], hypothesis.value
+        )
+        for hypothesis in (
+            FailureMode.NO_STRUCTURAL_CHANGE,
+            FailureMode.WORLD_SHIFT,
+            FailureMode.SENSOR_CORRUPTION,
+            FailureMode.MISSING_LATENT_VARIABLE,
+        )
+    }
+    if abs(sum(parsed_weights.values()) - 1.0) > 1e-6:
+        raise StructuredResponseError("belief probabilities must sum approximately to 1")
+    beliefs = StochasticHypothesisBeliefs.from_weights(parsed_weights)
+    confidence = data.get("confidence")
+    if confidence is not None:
+        confidence = _strict_probability(confidence, "confidence")
+    action, diagnosis = _validate_er1_decision_fields(data, decision)
+    if decision is DecisionType.DIAGNOSE and confidence is None:
+        raise StructuredResponseError("DIAGNOSE requires confidence")
+    return ER1FullAutonomousDecision(
+        decision=decision,
+        beliefs=beliefs,
+        reason_summary=_parse_reason(data),
+        action=action,
+        diagnosis=diagnosis,
+        confidence=confidence,
+    )
+
+
+def parse_er1_planner_only_response(text: str) -> ER1PlannerOnlyDecision:
+    """Strictly parse a four-hypothesis ER-1 planner decision."""
+    data = _parse_object(text)
+    _reject_extra_fields(data, {"decision", "action", "diagnosis", "reason_summary"})
+    decision = _parse_decision_type(data)
+    action, diagnosis = _validate_er1_decision_fields(data, decision)
+    return ER1PlannerOnlyDecision(
+        decision=decision,
+        reason_summary=_parse_reason(data),
+        action=action,
+        diagnosis=diagnosis,
+    )
+
+
 def _parse_object(text: str) -> dict[str, Any]:
     if not text or not text.strip():
         raise StructuredResponseError("provider response is empty")
@@ -235,6 +382,38 @@ def _validate_decision_fields(
         FailureMode.MISSING_LATENT_VARIABLE,
     ):
         raise StructuredResponseError("diagnosis is not a benchmark hypothesis")
+    return None, diagnosis
+
+
+def _validate_er1_decision_fields(
+    data: Mapping[str, Any],
+    decision: DecisionType,
+) -> tuple[DiagnosticAction | None, FailureMode | None]:
+    action_value = data.get("action")
+    diagnosis_value = data.get("diagnosis")
+    if decision is DecisionType.RUN_EXPERIMENT:
+        if diagnosis_value is not None:
+            raise StructuredResponseError("RUN_EXPERIMENT cannot include diagnosis")
+        try:
+            action = DiagnosticAction(action_value)
+        except (TypeError, ValueError) as error:
+            raise StructuredResponseError("unsupported or missing benchmark action") from error
+        if action not in BENCHMARK_ACTIONS:
+            raise StructuredResponseError("unsupported benchmark action")
+        return action, None
+    if action_value is not None:
+        raise StructuredResponseError("DIAGNOSE cannot include action")
+    try:
+        diagnosis = FailureMode(diagnosis_value)
+    except (TypeError, ValueError) as error:
+        raise StructuredResponseError("unsupported or missing diagnosis") from error
+    if diagnosis not in (
+        FailureMode.NO_STRUCTURAL_CHANGE,
+        FailureMode.WORLD_SHIFT,
+        FailureMode.SENSOR_CORRUPTION,
+        FailureMode.MISSING_LATENT_VARIABLE,
+    ):
+        raise StructuredResponseError("diagnosis is not an ER-1 hypothesis")
     return None, diagnosis
 
 

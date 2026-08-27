@@ -10,6 +10,15 @@ from epistemic_repair.beliefs.likelihoods import (
     information_gains,
 )
 from epistemic_repair.beliefs.state import HYPOTHESES, HypothesisBeliefs
+from epistemic_repair.beliefs.stochastic_likelihoods import (
+    StochasticActionInformationGains,
+    StochasticExperimentOutcome,
+    StochasticLikelihoodModel,
+    StochasticOutcomeSignal,
+    stochastic_expected_information_gain,
+    stochastic_information_gains,
+)
+from epistemic_repair.beliefs.stochastic_state import StochasticHypothesisBeliefs
 
 __all__ = [
     "ActionInformationGains",
@@ -19,7 +28,13 @@ __all__ = [
     "HypothesisBeliefs",
     "ImpossibleObservationError",
     "OutcomeSignal",
+    "StochasticActionInformationGains",
+    "StochasticExperimentOutcome",
+    "StochasticHypothesisBeliefs",
+    "StochasticLikelihoodModel",
+    "StochasticOutcomeSignal",
     "expected_information_gain",
     "information_gains",
+    "stochastic_expected_information_gain",
+    "stochastic_information_gains",
 ]
-

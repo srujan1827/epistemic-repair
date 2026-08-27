@@ -70,6 +70,10 @@ class BinaryMachine:
         """
         if not isinstance(failure_mode, FailureMode):
             raise TypeError("failure_mode must be a FailureMode")
+        if failure_mode is FailureMode.NO_STRUCTURAL_CHANGE:
+            raise ValueError(
+                "NO_STRUCTURAL_CHANGE is an ER-1-only stochastic hypothesis"
+            )
 
         self._context = Context.B
         if failure_mode is FailureMode.MISSING_LATENT_VARIABLE:

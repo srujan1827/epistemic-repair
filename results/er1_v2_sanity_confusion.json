@@ -1,0 +1,122 @@
+{
+  "conditions": {
+    "budget_5_threshold_0.90": {
+      "budget": 5,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 85,
+          "NO_STRUCTURAL_CHANGE": 1,
+          "SENSOR_CORRUPTION": 7,
+          "WORLD_SHIFT": 7
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 5,
+          "NO_STRUCTURAL_CHANGE": 82,
+          "SENSOR_CORRUPTION": 12,
+          "WORLD_SHIFT": 1
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 3,
+          "NO_STRUCTURAL_CHANGE": 3,
+          "SENSOR_CORRUPTION": 92,
+          "WORLD_SHIFT": 2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 4,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 0,
+          "WORLD_SHIFT": 96
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 85.0,
+          "NO_STRUCTURAL_CHANGE": 1.0,
+          "SENSOR_CORRUPTION": 7.0,
+          "WORLD_SHIFT": 7.0
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 5.0,
+          "NO_STRUCTURAL_CHANGE": 82.0,
+          "SENSOR_CORRUPTION": 12.0,
+          "WORLD_SHIFT": 1.0
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 3.0,
+          "NO_STRUCTURAL_CHANGE": 3.0,
+          "SENSOR_CORRUPTION": 92.0,
+          "WORLD_SHIFT": 2.0
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 4.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 0.0,
+          "WORLD_SHIFT": 96.0
+        }
+      },
+      "threshold": 0.9
+    },
+    "budget_8_threshold_0.90": {
+      "budget": 8,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 92,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 5,
+          "WORLD_SHIFT": 3
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 6,
+          "NO_STRUCTURAL_CHANGE": 81,
+          "SENSOR_CORRUPTION": 13,
+          "WORLD_SHIFT": 0
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 3,
+          "NO_STRUCTURAL_CHANGE": 1,
+          "SENSOR_CORRUPTION": 94,
+          "WORLD_SHIFT": 2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 3,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 1,
+          "WORLD_SHIFT": 96
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 92.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 5.0,
+          "WORLD_SHIFT": 3.0
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 6.0,
+          "NO_STRUCTURAL_CHANGE": 81.0,
+          "SENSOR_CORRUPTION": 13.0,
+          "WORLD_SHIFT": 0.0
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 3.0,
+          "NO_STRUCTURAL_CHANGE": 1.0,
+          "SENSOR_CORRUPTION": 94.0,
+          "WORLD_SHIFT": 2.0
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 3.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 1.0,
+          "WORLD_SHIFT": 96.0
+        }
+      },
+      "threshold": 0.9
+    }
+  },
+  "hypothesis_order": [
+    "NO_STRUCTURAL_CHANGE",
+    "WORLD_SHIFT",
+    "SENSOR_CORRUPTION",
+    "MISSING_LATENT_VARIABLE"
+  ]
+}

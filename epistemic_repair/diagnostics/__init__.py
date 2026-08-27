@@ -11,6 +11,8 @@ from epistemic_repair.diagnostics.results import (
     ExperimentResult,
     LatentInspectionResult,
     RepeatTrialResult,
+    StochasticBenchmarkExperimentResult,
+    StochasticTrustedSensorResult,
     TrustedSensorResult,
 )
 
@@ -23,5 +25,7 @@ __all__ = [
     "ExperimentResult",
     "LatentInspectionResult",
     "RepeatTrialResult",
+    "StochasticBenchmarkExperimentResult",
+    "StochasticTrustedSensorResult",
     "TrustedSensorResult",
 ]

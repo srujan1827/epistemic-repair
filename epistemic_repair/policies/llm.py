@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Callable
 
 from epistemic_repair.beliefs.state import HypothesisBeliefs
+from epistemic_repair.beliefs.stochastic_state import StochasticHypothesisBeliefs
 from epistemic_repair.llm.base import (
     LLMClient,
     LLMError,
@@ -18,12 +19,22 @@ from epistemic_repair.llm.schemas import (
     LLMDecision,
     PlannerOnlyDecision,
     StructuredResponseError,
+    er1_full_autonomous_json_schema,
+    er1_planner_only_json_schema,
     full_autonomous_json_schema,
+    parse_er1_full_autonomous_response,
+    parse_er1_planner_only_response,
     parse_full_autonomous_response,
     parse_planner_only_response,
     planner_only_json_schema,
 )
 from epistemic_repair.policies.views import BenchmarkAgentView
+from epistemic_repair.policies.stochastic_views import StochasticBenchmarkAgentView
+from epistemic_repair.prompts.binary_er1 import (
+    BINARY_ER1_PROMPT_VERSION,
+    build_er1_full_autonomous_prompt,
+    build_er1_planner_only_prompt,
+)
 from epistemic_repair.prompts.binary_v0 import (
     BINARY_V0_PROMPT_VERSION,
     build_full_autonomous_prompt,
@@ -90,6 +101,7 @@ class FullAutonomousLLMPolicy:
             prompt=prompt,
             schema=full_autonomous_json_schema(),
             parser=parse_full_autonomous_response,
+            prompt_version=BINARY_V0_PROMPT_VERSION,
         )
 
 
@@ -115,6 +127,57 @@ class PlannerOnlyLLMPolicy:
             prompt=prompt,
             schema=planner_only_json_schema(),
             parser=parse_planner_only_response,
+            prompt_version=BINARY_V0_PROMPT_VERSION,
+        )
+
+
+class ER1FullAutonomousLLMPolicy:
+    """ER-1 LLM policy responsible for beliefs, planning, and stopping."""
+
+    def __init__(self, client: LLMClient, config: LLMConfig) -> None:
+        self._client = client
+        self.config = config
+
+    def decide(self, view: StochasticBenchmarkAgentView) -> LLMPolicyResult:
+        if type(view) is not StochasticBenchmarkAgentView:
+            raise TypeError(
+                "ER-1 autonomous policy requires StochasticBenchmarkAgentView"
+            )
+        prompt = build_er1_full_autonomous_prompt(view)
+        return _generate_with_retries(
+            client=self._client,
+            config=self.config,
+            prompt=prompt,
+            schema=er1_full_autonomous_json_schema(),
+            parser=parse_er1_full_autonomous_response,
+            prompt_version=BINARY_ER1_PROMPT_VERSION,
+        )
+
+
+class ER1PlannerOnlyLLMPolicy:
+    """ER-1 planner policy using supplied four-way normative beliefs."""
+
+    def __init__(self, client: LLMClient, config: LLMConfig) -> None:
+        self._client = client
+        self.config = config
+
+    def decide(
+        self,
+        view: StochasticBenchmarkAgentView,
+        normative_beliefs: StochasticHypothesisBeliefs,
+    ) -> LLMPolicyResult:
+        if type(view) is not StochasticBenchmarkAgentView:
+            raise TypeError(
+                "ER-1 planner policy requires StochasticBenchmarkAgentView"
+            )
+        prompt = build_er1_planner_only_prompt(view, normative_beliefs)
+        return _generate_with_retries(
+            client=self._client,
+            config=self.config,
+            prompt=prompt,
+            schema=er1_planner_only_json_schema(),
+            parser=parse_er1_planner_only_response,
+            prompt_version=BINARY_ER1_PROMPT_VERSION,
         )
 
 
@@ -125,6 +188,7 @@ def _generate_with_retries(
     prompt: str,
     schema: dict[str, object],
     parser: Callable[[str], LLMDecision],
+    prompt_version: str,
 ) -> LLMPolicyResult:
     attempts: list[LLMAttemptRecord] = []
     request = LLMRequest(prompt=prompt, response_schema=schema)
@@ -150,7 +214,7 @@ def _generate_with_retries(
                     continue
                 return LLMPolicyResult(
                     prompt=prompt,
-                    prompt_version=BINARY_V0_PROMPT_VERSION,
+                    prompt_version=prompt_version,
                     decision=None,
                     attempts=tuple(attempts),
                 )
@@ -167,7 +231,7 @@ def _generate_with_retries(
             )
             return LLMPolicyResult(
                 prompt=prompt,
-                prompt_version=BINARY_V0_PROMPT_VERSION,
+                prompt_version=prompt_version,
                 decision=decision,
                 attempts=tuple(attempts),
             )
@@ -184,7 +248,7 @@ def _generate_with_retries(
 
         return LLMPolicyResult(
             prompt=prompt,
-            prompt_version=BINARY_V0_PROMPT_VERSION,
+            prompt_version=prompt_version,
             decision=None,
             attempts=tuple(attempts),
         )
@@ -205,4 +269,3 @@ def _error_attempt(
         error_type=type(error).__name__,
         error_message=sanitize_text(str(error)),
     )
-

@@ -23,6 +23,14 @@ class TrustedSensorResult:
 
 
 @dataclass(frozen=True, slots=True)
+class StochasticTrustedSensorResult:
+    """Noisy independent trusted-sensor observation T for ER-1."""
+
+    x: int
+    trusted_t: int
+
+
+@dataclass(frozen=True, slots=True)
 class ChangeContextResult:
     """Primary-sensor observation after moving to a controlled context."""
 
@@ -55,4 +63,8 @@ ExperimentResult: TypeAlias = (
 
 BenchmarkExperimentResult: TypeAlias = (
     RepeatTrialResult | TrustedSensorResult | ChangeContextResult
+)
+
+StochasticBenchmarkExperimentResult: TypeAlias = (
+    RepeatTrialResult | StochasticTrustedSensorResult | ChangeContextResult
 )

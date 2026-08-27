@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "epistemic-repair"
 version = "0.1.0"
-description = "A deterministic toy environment for studying cause-aware epistemic repair."
+description = "Deterministic and stochastic benchmarks for cause-aware epistemic repair."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []

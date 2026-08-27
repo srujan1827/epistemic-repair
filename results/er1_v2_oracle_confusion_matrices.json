@@ -1,0 +1,1305 @@
+{
+  "conditions": {
+    "budget_1_threshold_0.80": {
+      "budget": 1,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 116,
+          "WORLD_SHIFT": 884
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 938,
+          "WORLD_SHIFT": 62
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 938,
+          "WORLD_SHIFT": 62
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 116,
+          "WORLD_SHIFT": 884
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 11.6,
+          "WORLD_SHIFT": 88.4
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 93.8,
+          "WORLD_SHIFT": 6.2
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 93.8,
+          "WORLD_SHIFT": 6.2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 11.6,
+          "WORLD_SHIFT": 88.4
+        }
+      },
+      "threshold": 0.8
+    },
+    "budget_1_threshold_0.90": {
+      "budget": 1,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 116,
+          "WORLD_SHIFT": 884
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 938,
+          "WORLD_SHIFT": 62
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 938,
+          "WORLD_SHIFT": 62
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 116,
+          "WORLD_SHIFT": 884
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 11.6,
+          "WORLD_SHIFT": 88.4
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 93.8,
+          "WORLD_SHIFT": 6.2
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 93.8,
+          "WORLD_SHIFT": 6.2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 11.6,
+          "WORLD_SHIFT": 88.4
+        }
+      },
+      "threshold": 0.9
+    },
+    "budget_1_threshold_0.95": {
+      "budget": 1,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 116,
+          "WORLD_SHIFT": 884
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 938,
+          "WORLD_SHIFT": 62
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 938,
+          "WORLD_SHIFT": 62
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 0,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 116,
+          "WORLD_SHIFT": 884
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 11.6,
+          "WORLD_SHIFT": 88.4
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 93.8,
+          "WORLD_SHIFT": 6.2
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 93.8,
+          "WORLD_SHIFT": 6.2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 0.0,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 11.6,
+          "WORLD_SHIFT": 88.4
+        }
+      },
+      "threshold": 0.95
+    },
+    "budget_2_threshold_0.80": {
+      "budget": 2,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 760,
+          "NO_STRUCTURAL_CHANGE": 90,
+          "SENSOR_CORRUPTION": 26,
+          "WORLD_SHIFT": 124
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 58,
+          "NO_STRUCTURAL_CHANGE": 841,
+          "SENSOR_CORRUPTION": 97,
+          "WORLD_SHIFT": 4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 10,
+          "NO_STRUCTURAL_CHANGE": 133,
+          "SENSOR_CORRUPTION": 805,
+          "WORLD_SHIFT": 52
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 110,
+          "NO_STRUCTURAL_CHANGE": 17,
+          "SENSOR_CORRUPTION": 99,
+          "WORLD_SHIFT": 774
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 76.0,
+          "NO_STRUCTURAL_CHANGE": 9.0,
+          "SENSOR_CORRUPTION": 2.6,
+          "WORLD_SHIFT": 12.4
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 5.8,
+          "NO_STRUCTURAL_CHANGE": 84.1,
+          "SENSOR_CORRUPTION": 9.7,
+          "WORLD_SHIFT": 0.4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 1.0,
+          "NO_STRUCTURAL_CHANGE": 13.3,
+          "SENSOR_CORRUPTION": 80.5,
+          "WORLD_SHIFT": 5.2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 11.0,
+          "NO_STRUCTURAL_CHANGE": 1.7,
+          "SENSOR_CORRUPTION": 9.9,
+          "WORLD_SHIFT": 77.4
+        }
+      },
+      "threshold": 0.8
+    },
+    "budget_2_threshold_0.90": {
+      "budget": 2,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 760,
+          "NO_STRUCTURAL_CHANGE": 90,
+          "SENSOR_CORRUPTION": 26,
+          "WORLD_SHIFT": 124
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 58,
+          "NO_STRUCTURAL_CHANGE": 841,
+          "SENSOR_CORRUPTION": 97,
+          "WORLD_SHIFT": 4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 10,
+          "NO_STRUCTURAL_CHANGE": 133,
+          "SENSOR_CORRUPTION": 805,
+          "WORLD_SHIFT": 52
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 110,
+          "NO_STRUCTURAL_CHANGE": 17,
+          "SENSOR_CORRUPTION": 99,
+          "WORLD_SHIFT": 774
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 76.0,
+          "NO_STRUCTURAL_CHANGE": 9.0,
+          "SENSOR_CORRUPTION": 2.6,
+          "WORLD_SHIFT": 12.4
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 5.8,
+          "NO_STRUCTURAL_CHANGE": 84.1,
+          "SENSOR_CORRUPTION": 9.7,
+          "WORLD_SHIFT": 0.4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 1.0,
+          "NO_STRUCTURAL_CHANGE": 13.3,
+          "SENSOR_CORRUPTION": 80.5,
+          "WORLD_SHIFT": 5.2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 11.0,
+          "NO_STRUCTURAL_CHANGE": 1.7,
+          "SENSOR_CORRUPTION": 9.9,
+          "WORLD_SHIFT": 77.4
+        }
+      },
+      "threshold": 0.9
+    },
+    "budget_2_threshold_0.95": {
+      "budget": 2,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 760,
+          "NO_STRUCTURAL_CHANGE": 90,
+          "SENSOR_CORRUPTION": 26,
+          "WORLD_SHIFT": 124
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 58,
+          "NO_STRUCTURAL_CHANGE": 841,
+          "SENSOR_CORRUPTION": 97,
+          "WORLD_SHIFT": 4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 10,
+          "NO_STRUCTURAL_CHANGE": 133,
+          "SENSOR_CORRUPTION": 805,
+          "WORLD_SHIFT": 52
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 110,
+          "NO_STRUCTURAL_CHANGE": 17,
+          "SENSOR_CORRUPTION": 99,
+          "WORLD_SHIFT": 774
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 76.0,
+          "NO_STRUCTURAL_CHANGE": 9.0,
+          "SENSOR_CORRUPTION": 2.6,
+          "WORLD_SHIFT": 12.4
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 5.8,
+          "NO_STRUCTURAL_CHANGE": 84.1,
+          "SENSOR_CORRUPTION": 9.7,
+          "WORLD_SHIFT": 0.4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 1.0,
+          "NO_STRUCTURAL_CHANGE": 13.3,
+          "SENSOR_CORRUPTION": 80.5,
+          "WORLD_SHIFT": 5.2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 11.0,
+          "NO_STRUCTURAL_CHANGE": 1.7,
+          "SENSOR_CORRUPTION": 9.9,
+          "WORLD_SHIFT": 77.4
+        }
+      },
+      "threshold": 0.95
+    },
+    "budget_3_threshold_0.80": {
+      "budget": 3,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 760,
+          "NO_STRUCTURAL_CHANGE": 16,
+          "SENSOR_CORRUPTION": 100,
+          "WORLD_SHIFT": 124
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 58,
+          "NO_STRUCTURAL_CHANGE": 749,
+          "SENSOR_CORRUPTION": 189,
+          "WORLD_SHIFT": 4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 10,
+          "NO_STRUCTURAL_CHANGE": 13,
+          "SENSOR_CORRUPTION": 925,
+          "WORLD_SHIFT": 52
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 110,
+          "NO_STRUCTURAL_CHANGE": 4,
+          "SENSOR_CORRUPTION": 112,
+          "WORLD_SHIFT": 774
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 76.0,
+          "NO_STRUCTURAL_CHANGE": 1.6,
+          "SENSOR_CORRUPTION": 10.0,
+          "WORLD_SHIFT": 12.4
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 5.8,
+          "NO_STRUCTURAL_CHANGE": 74.9,
+          "SENSOR_CORRUPTION": 18.9,
+          "WORLD_SHIFT": 0.4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 1.0,
+          "NO_STRUCTURAL_CHANGE": 1.3,
+          "SENSOR_CORRUPTION": 92.5,
+          "WORLD_SHIFT": 5.2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 11.0,
+          "NO_STRUCTURAL_CHANGE": 0.4,
+          "SENSOR_CORRUPTION": 11.2,
+          "WORLD_SHIFT": 77.4
+        }
+      },
+      "threshold": 0.8
+    },
+    "budget_3_threshold_0.90": {
+      "budget": 3,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 767,
+          "NO_STRUCTURAL_CHANGE": 16,
+          "SENSOR_CORRUPTION": 96,
+          "WORLD_SHIFT": 121
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 57,
+          "NO_STRUCTURAL_CHANGE": 749,
+          "SENSOR_CORRUPTION": 184,
+          "WORLD_SHIFT": 10
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 57,
+          "NO_STRUCTURAL_CHANGE": 13,
+          "SENSOR_CORRUPTION": 869,
+          "WORLD_SHIFT": 61
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 89,
+          "NO_STRUCTURAL_CHANGE": 4,
+          "SENSOR_CORRUPTION": 19,
+          "WORLD_SHIFT": 888
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 76.7,
+          "NO_STRUCTURAL_CHANGE": 1.6,
+          "SENSOR_CORRUPTION": 9.6,
+          "WORLD_SHIFT": 12.1
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 5.7,
+          "NO_STRUCTURAL_CHANGE": 74.9,
+          "SENSOR_CORRUPTION": 18.4,
+          "WORLD_SHIFT": 1.0
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 5.7,
+          "NO_STRUCTURAL_CHANGE": 1.3,
+          "SENSOR_CORRUPTION": 86.9,
+          "WORLD_SHIFT": 6.1
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 8.9,
+          "NO_STRUCTURAL_CHANGE": 0.4,
+          "SENSOR_CORRUPTION": 1.9,
+          "WORLD_SHIFT": 88.8
+        }
+      },
+      "threshold": 0.9
+    },
+    "budget_3_threshold_0.95": {
+      "budget": 3,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 767,
+          "NO_STRUCTURAL_CHANGE": 16,
+          "SENSOR_CORRUPTION": 96,
+          "WORLD_SHIFT": 121
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 57,
+          "NO_STRUCTURAL_CHANGE": 749,
+          "SENSOR_CORRUPTION": 184,
+          "WORLD_SHIFT": 10
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 57,
+          "NO_STRUCTURAL_CHANGE": 13,
+          "SENSOR_CORRUPTION": 869,
+          "WORLD_SHIFT": 61
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 89,
+          "NO_STRUCTURAL_CHANGE": 4,
+          "SENSOR_CORRUPTION": 19,
+          "WORLD_SHIFT": 888
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 76.7,
+          "NO_STRUCTURAL_CHANGE": 1.6,
+          "SENSOR_CORRUPTION": 9.6,
+          "WORLD_SHIFT": 12.1
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 5.7,
+          "NO_STRUCTURAL_CHANGE": 74.9,
+          "SENSOR_CORRUPTION": 18.4,
+          "WORLD_SHIFT": 1.0
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 5.7,
+          "NO_STRUCTURAL_CHANGE": 1.3,
+          "SENSOR_CORRUPTION": 86.9,
+          "WORLD_SHIFT": 6.1
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 8.9,
+          "NO_STRUCTURAL_CHANGE": 0.4,
+          "SENSOR_CORRUPTION": 1.9,
+          "WORLD_SHIFT": 88.8
+        }
+      },
+      "threshold": 0.95
+    },
+    "budget_5_threshold_0.80": {
+      "budget": 5,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 810,
+          "NO_STRUCTURAL_CHANGE": 30,
+          "SENSOR_CORRUPTION": 28,
+          "WORLD_SHIFT": 132
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 62,
+          "NO_STRUCTURAL_CHANGE": 827,
+          "SENSOR_CORRUPTION": 106,
+          "WORLD_SHIFT": 5
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 10,
+          "NO_STRUCTURAL_CHANGE": 30,
+          "SENSOR_CORRUPTION": 904,
+          "WORLD_SHIFT": 56
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 114,
+          "NO_STRUCTURAL_CHANGE": 4,
+          "SENSOR_CORRUPTION": 102,
+          "WORLD_SHIFT": 780
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 81.0,
+          "NO_STRUCTURAL_CHANGE": 3.0,
+          "SENSOR_CORRUPTION": 2.8,
+          "WORLD_SHIFT": 13.2
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 6.2,
+          "NO_STRUCTURAL_CHANGE": 82.7,
+          "SENSOR_CORRUPTION": 10.6,
+          "WORLD_SHIFT": 0.5
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 1.0,
+          "NO_STRUCTURAL_CHANGE": 3.0,
+          "SENSOR_CORRUPTION": 90.4,
+          "WORLD_SHIFT": 5.6
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 11.4,
+          "NO_STRUCTURAL_CHANGE": 0.4,
+          "SENSOR_CORRUPTION": 10.2,
+          "WORLD_SHIFT": 78.0
+        }
+      },
+      "threshold": 0.8
+    },
+    "budget_5_threshold_0.90": {
+      "budget": 5,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 873,
+          "NO_STRUCTURAL_CHANGE": 30,
+          "SENSOR_CORRUPTION": 45,
+          "WORLD_SHIFT": 52
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 62,
+          "NO_STRUCTURAL_CHANGE": 827,
+          "SENSOR_CORRUPTION": 106,
+          "WORLD_SHIFT": 5
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 23,
+          "NO_STRUCTURAL_CHANGE": 30,
+          "SENSOR_CORRUPTION": 931,
+          "WORLD_SHIFT": 16
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 21,
+          "NO_STRUCTURAL_CHANGE": 4,
+          "SENSOR_CORRUPTION": 14,
+          "WORLD_SHIFT": 961
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 87.3,
+          "NO_STRUCTURAL_CHANGE": 3.0,
+          "SENSOR_CORRUPTION": 4.5,
+          "WORLD_SHIFT": 5.2
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 6.2,
+          "NO_STRUCTURAL_CHANGE": 82.7,
+          "SENSOR_CORRUPTION": 10.6,
+          "WORLD_SHIFT": 0.5
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 2.3,
+          "NO_STRUCTURAL_CHANGE": 3.0,
+          "SENSOR_CORRUPTION": 93.1,
+          "WORLD_SHIFT": 1.6
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 2.1,
+          "NO_STRUCTURAL_CHANGE": 0.4,
+          "SENSOR_CORRUPTION": 1.4,
+          "WORLD_SHIFT": 96.1
+        }
+      },
+      "threshold": 0.9
+    },
+    "budget_5_threshold_0.95": {
+      "budget": 5,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 865,
+          "NO_STRUCTURAL_CHANGE": 39,
+          "SENSOR_CORRUPTION": 44,
+          "WORLD_SHIFT": 52
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 16,
+          "NO_STRUCTURAL_CHANGE": 943,
+          "SENSOR_CORRUPTION": 36,
+          "WORLD_SHIFT": 5
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 23,
+          "NO_STRUCTURAL_CHANGE": 31,
+          "SENSOR_CORRUPTION": 930,
+          "WORLD_SHIFT": 16
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 21,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 18,
+          "WORLD_SHIFT": 961
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 86.5,
+          "NO_STRUCTURAL_CHANGE": 3.9,
+          "SENSOR_CORRUPTION": 4.4,
+          "WORLD_SHIFT": 5.2
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 1.6,
+          "NO_STRUCTURAL_CHANGE": 94.3,
+          "SENSOR_CORRUPTION": 3.6,
+          "WORLD_SHIFT": 0.5
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 2.3,
+          "NO_STRUCTURAL_CHANGE": 3.1,
+          "SENSOR_CORRUPTION": 93.0,
+          "WORLD_SHIFT": 1.6
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 2.1,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 1.8,
+          "WORLD_SHIFT": 96.1
+        }
+      },
+      "threshold": 0.95
+    },
+    "budget_8_threshold_0.80": {
+      "budget": 8,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 826,
+          "NO_STRUCTURAL_CHANGE": 19,
+          "SENSOR_CORRUPTION": 30,
+          "WORLD_SHIFT": 125
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 65,
+          "NO_STRUCTURAL_CHANGE": 825,
+          "SENSOR_CORRUPTION": 106,
+          "WORLD_SHIFT": 4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 10,
+          "NO_STRUCTURAL_CHANGE": 18,
+          "SENSOR_CORRUPTION": 920,
+          "WORLD_SHIFT": 52
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 114,
+          "NO_STRUCTURAL_CHANGE": 4,
+          "SENSOR_CORRUPTION": 102,
+          "WORLD_SHIFT": 780
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 82.6,
+          "NO_STRUCTURAL_CHANGE": 1.9,
+          "SENSOR_CORRUPTION": 3.0,
+          "WORLD_SHIFT": 12.5
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 6.5,
+          "NO_STRUCTURAL_CHANGE": 82.5,
+          "SENSOR_CORRUPTION": 10.6,
+          "WORLD_SHIFT": 0.4
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 1.0,
+          "NO_STRUCTURAL_CHANGE": 1.8,
+          "SENSOR_CORRUPTION": 92.0,
+          "WORLD_SHIFT": 5.2
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 11.4,
+          "NO_STRUCTURAL_CHANGE": 0.4,
+          "SENSOR_CORRUPTION": 10.2,
+          "WORLD_SHIFT": 78.0
+        }
+      },
+      "threshold": 0.8
+    },
+    "budget_8_threshold_0.90": {
+      "budget": 8,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 911,
+          "NO_STRUCTURAL_CHANGE": 18,
+          "SENSOR_CORRUPTION": 38,
+          "WORLD_SHIFT": 33
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 65,
+          "NO_STRUCTURAL_CHANGE": 823,
+          "SENSOR_CORRUPTION": 109,
+          "WORLD_SHIFT": 3
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 24,
+          "NO_STRUCTURAL_CHANGE": 16,
+          "SENSOR_CORRUPTION": 950,
+          "WORLD_SHIFT": 10
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 17,
+          "NO_STRUCTURAL_CHANGE": 4,
+          "SENSOR_CORRUPTION": 15,
+          "WORLD_SHIFT": 964
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 91.1,
+          "NO_STRUCTURAL_CHANGE": 1.8,
+          "SENSOR_CORRUPTION": 3.8,
+          "WORLD_SHIFT": 3.3
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 6.5,
+          "NO_STRUCTURAL_CHANGE": 82.3,
+          "SENSOR_CORRUPTION": 10.9,
+          "WORLD_SHIFT": 0.3
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 2.4,
+          "NO_STRUCTURAL_CHANGE": 1.6,
+          "SENSOR_CORRUPTION": 95.0,
+          "WORLD_SHIFT": 1.0
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 1.7,
+          "NO_STRUCTURAL_CHANGE": 0.4,
+          "SENSOR_CORRUPTION": 1.5,
+          "WORLD_SHIFT": 96.4
+        }
+      },
+      "threshold": 0.9
+    },
+    "budget_8_threshold_0.95": {
+      "budget": 8,
+      "counts": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 944,
+          "NO_STRUCTURAL_CHANGE": 10,
+          "SENSOR_CORRUPTION": 26,
+          "WORLD_SHIFT": 20
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 19,
+          "NO_STRUCTURAL_CHANGE": 954,
+          "SENSOR_CORRUPTION": 24,
+          "WORLD_SHIFT": 3
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 20,
+          "NO_STRUCTURAL_CHANGE": 7,
+          "SENSOR_CORRUPTION": 963,
+          "WORLD_SHIFT": 10
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 12,
+          "NO_STRUCTURAL_CHANGE": 0,
+          "SENSOR_CORRUPTION": 17,
+          "WORLD_SHIFT": 971
+        }
+      },
+      "row_percentages": {
+        "MISSING_LATENT_VARIABLE": {
+          "MISSING_LATENT_VARIABLE": 94.4,
+          "NO_STRUCTURAL_CHANGE": 1.0,
+          "SENSOR_CORRUPTION": 2.6,
+          "WORLD_SHIFT": 2.0
+        },
+        "NO_STRUCTURAL_CHANGE": {
+          "MISSING_LATENT_VARIABLE": 1.9,
+          "NO_STRUCTURAL_CHANGE": 95.4,
+          "SENSOR_CORRUPTION": 2.4,
+          "WORLD_SHIFT": 0.3
+        },
+        "SENSOR_CORRUPTION": {
+          "MISSING_LATENT_VARIABLE": 2.0,
+          "NO_STRUCTURAL_CHANGE": 0.7,
+          "SENSOR_CORRUPTION": 96.3,
+          "WORLD_SHIFT": 1.0
+        },
+        "WORLD_SHIFT": {
+          "MISSING_LATENT_VARIABLE": 1.2,
+          "NO_STRUCTURAL_CHANGE": 0.0,
+          "SENSOR_CORRUPTION": 1.7,
+          "WORLD_SHIFT": 97.1
+        }
+      },
+      "threshold": 0.95
+    }
+  },
+  "hypothesis_order": [
+    "NO_STRUCTURAL_CHANGE",
+    "WORLD_SHIFT",
+    "SENSOR_CORRUPTION",
+    "MISSING_LATENT_VARIABLE"
+  ],
+  "top_action_sequences": {
+    "conditions": {
+      "budget_5_threshold_0.90": {
+        "budget": 5,
+        "by_hypothesis": {
+          "MISSING_LATENT_VARIABLE": [
+            {
+              "count": 695,
+              "percentage": 69.5,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 102,
+              "percentage": 10.2,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 97,
+              "percentage": 9.7,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "REPEAT_TRIAL"
+              ]
+            },
+            {
+              "count": 74,
+              "percentage": 7.4,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 16,
+              "percentage": 1.6,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT"
+              ]
+            }
+          ],
+          "NO_STRUCTURAL_CHANGE": [
+            {
+              "count": 749,
+              "percentage": 74.9,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 147,
+              "percentage": 14.7,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 92,
+              "percentage": 9.2,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 7,
+              "percentage": 0.7,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 3,
+              "percentage": 0.3,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "REPEAT_TRIAL"
+              ]
+            }
+          ],
+          "SENSOR_CORRUPTION": [
+            {
+              "count": 762,
+              "percentage": 76.2,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 120,
+              "percentage": 12.0,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 55,
+              "percentage": 5.5,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 45,
+              "percentage": 4.5,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "REPEAT_TRIAL"
+              ]
+            },
+            {
+              "count": 13,
+              "percentage": 1.3,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT"
+              ]
+            }
+          ],
+          "WORLD_SHIFT": [
+            {
+              "count": 713,
+              "percentage": 71.3,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 165,
+              "percentage": 16.5,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 100,
+              "percentage": 10.0,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 13,
+              "percentage": 1.3,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 5,
+              "percentage": 0.5,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "REPEAT_TRIAL"
+              ]
+            }
+          ]
+        },
+        "threshold": 0.9
+      },
+      "budget_8_threshold_0.90": {
+        "budget": 8,
+        "by_hypothesis": {
+          "MISSING_LATENT_VARIABLE": [
+            {
+              "count": 695,
+              "percentage": 69.5,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 80,
+              "percentage": 8.0,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "REPEAT_TRIAL"
+              ]
+            },
+            {
+              "count": 79,
+              "percentage": 7.9,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 52,
+              "percentage": 5.2,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 16,
+              "percentage": 1.6,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT"
+              ]
+            }
+          ],
+          "NO_STRUCTURAL_CHANGE": [
+            {
+              "count": 749,
+              "percentage": 74.9,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 147,
+              "percentage": 14.7,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 63,
+              "percentage": 6.3,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "REPEAT_TRIAL"
+              ]
+            },
+            {
+              "count": 13,
+              "percentage": 1.3,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 7,
+              "percentage": 0.7,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "REPEAT_TRIAL",
+                "REPEAT_TRIAL"
+              ]
+            }
+          ],
+          "SENSOR_CORRUPTION": [
+            {
+              "count": 762,
+              "percentage": 76.2,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 99,
+              "percentage": 9.9,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            },
+            {
+              "count": 51,
+              "percentage": 5.1,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 26,
+              "percentage": 2.6,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "REPEAT_TRIAL",
+                "REPEAT_TRIAL",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 15,
+              "percentage": 1.5,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            }
+          ],
+          "WORLD_SHIFT": [
+            {
+              "count": 713,
+              "percentage": 71.3,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 165,
+              "percentage": 16.5,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 71,
+              "percentage": 7.1,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 20,
+              "percentage": 2.0,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR",
+                "USE_TRUSTED_SENSOR"
+              ]
+            },
+            {
+              "count": 7,
+              "percentage": 0.7,
+              "sequence": [
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT",
+                "CHANGE_CONTEXT",
+                "USE_TRUSTED_SENSOR",
+                "CHANGE_CONTEXT"
+              ]
+            }
+          ]
+        },
+        "threshold": 0.9
+      }
+    }
+  }
+}

@@ -22,6 +22,8 @@ class DeterministicMockLLMClient(LLMClient):
 
     @staticmethod
     def _decide(prompt: str, *, planner_only: bool) -> dict[str, object]:
+        if "binary_er1_001" in prompt or "binary_er1_v2_001" in prompt:
+            return _decide_er1(prompt, planner_only)
         if "trusted Y=1" in prompt:
             return _diagnosis("SENSOR_CORRUPTION", planner_only)
         if "CHANGE_CONTEXT -> context=A, X=1, primary O=1" in prompt:
@@ -83,3 +85,58 @@ def _beliefs(world: float, sensor: float, latent: float) -> dict[str, float]:
         "SENSOR_CORRUPTION": sensor,
         "MISSING_LATENT_VARIABLE": latent,
     }
+
+
+def _decide_er1(prompt: str, planner_only: bool) -> dict[str, object]:
+    if "trusted T=1" in prompt and "REPEAT_TRIAL -> X=1, primary O=1" in prompt:
+        return _er1_diagnosis("NO_STRUCTURAL_CHANGE", planner_only)
+    if "trusted T=1" in prompt and "REPEAT_TRIAL -> X=1, primary O=0" in prompt:
+        return _er1_diagnosis("SENSOR_CORRUPTION", planner_only)
+    if "trusted T=0" in prompt and "CHANGE_CONTEXT -> context=A, X=1, primary O=1" in prompt:
+        return _er1_diagnosis("MISSING_LATENT_VARIABLE", planner_only)
+    if "trusted T=0" in prompt and "CHANGE_CONTEXT -> context=A, X=1, primary O=0" in prompt:
+        return _er1_diagnosis("WORLD_SHIFT", planner_only)
+    if "trusted T=1" in prompt:
+        return _er1_experiment("REPEAT_TRIAL", planner_only)
+    if "trusted T=0" in prompt:
+        return _er1_experiment("CHANGE_CONTEXT", planner_only)
+    return _er1_experiment("USE_TRUSTED_SENSOR", planner_only)
+
+
+def _er1_experiment(action: str, planner_only: bool) -> dict[str, object]:
+    result: dict[str, object] = {
+        "decision": "RUN_EXPERIMENT",
+        "action": action,
+        "diagnosis": None,
+        "reason_summary": "Collect another noisy observation before diagnosing.",
+    }
+    if not planner_only:
+        result["beliefs"] = {
+            "NO_STRUCTURAL_CHANGE": 0.25,
+            "WORLD_SHIFT": 0.25,
+            "SENSOR_CORRUPTION": 0.25,
+            "MISSING_LATENT_VARIABLE": 0.25,
+        }
+        result["confidence"] = None
+    return result
+
+
+def _er1_diagnosis(label: str, planner_only: bool) -> dict[str, object]:
+    result: dict[str, object] = {
+        "decision": "DIAGNOSE",
+        "action": None,
+        "diagnosis": label,
+        "reason_summary": "The accumulated stochastic evidence supports this diagnosis.",
+    }
+    if not planner_only:
+        result["beliefs"] = {
+            hypothesis: 1.0 if hypothesis == label else 0.0
+            for hypothesis in (
+                "NO_STRUCTURAL_CHANGE",
+                "WORLD_SHIFT",
+                "SENSOR_CORRUPTION",
+                "MISSING_LATENT_VARIABLE",
+            )
+        }
+        result["confidence"] = 1.0
+    return result

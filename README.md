@@ -44,7 +44,7 @@ ER-0 remains a standalone deterministic benchmark. Its environment,
 likelihoods, three-hypothesis belief state, trusted-sensor semantics, prompts,
 and evaluation behavior are unchanged by ER-1.
 
-## ER-1: stochastic epistemic diagnosis
+## ER-1 V1: single-process stochastic diagnosis
 
 ER-1 asks a harder question: did anything structurally fail at all? In a noisy
 world, adaptation can itself be harmful. An investigator must distinguish
@@ -102,6 +102,41 @@ new physical trial and returns noisy trusted observation `T`, not hidden `Y`.
 The `0.99` reliability makes it highly informative without allowing one
 measurement to collapse the posterior mathematically. ER-0 continues to return
 its existing perfect trusted measurement of `Y`.
+
+## ER-1 V2: transient trigger, persistent investigation
+
+ER-1 V1 remains the historical baseline: its selected trigger anomaly and its
+later investigation evidence are explained by one stochastic process. V2 is
+additive and separates those roles explicitly:
+
+1. A one-time **transient trigger anomaly** model explains why the episode
+   entered investigation after `X=1, O=0`.
+2. A separate **persistent investigation dynamics** model generates every
+   later `REPEAT_TRIAL`, `USE_TRUSTED_SENSOR`, and `CHANGE_CONTEXT` result.
+
+This separation matters because making an anomaly plausible under
+`NO_STRUCTURAL_CHANGE` should not require making every later healthy-system
+observation noisier. With equal base priors, V2 conditions exactly once on the
+trigger likelihoods `0.30`, `0.70`, `0.65`, and `0.70`, producing:
+
+| Hypothesis | `P(H | A0)` |
+| --- | ---: |
+| `NO_STRUCTURAL_CHANGE` | `0.1276595745` |
+| `WORLD_SHIFT` | `0.2978723404` |
+| `SENSOR_CORRUPTION` | `0.2765957447` |
+| `MISSING_LATENT_VARIABLE` | `0.2978723404` |
+
+The trigger is constructed directly, consumes no random draw, and has no
+hidden trigger `Y`. Every diagnostic experiment is then a fresh trial from the
+persistent process. The V2 oracle starts from the trigger-conditioned belief
+state, uses only persistent likelihoods for Bayesian updates and expected
+information gain, and never receives hidden ground truth.
+
+The V2 LLM prompt is versioned as `binary_er1_v2_001`. It explains the
+transient-versus-persistent distinction qualitatively but exposes no trigger
+probabilities, investigation parameters, likelihood tables, information-gain
+values, repairs, or hidden state. Planner-only receives the current normative
+posterior; full-autonomous does not. V1 retains `binary_er1_001` unchanged.
 
 ## ER-0 active diagnostic experiments
 
@@ -254,6 +289,15 @@ The default repetition count is three. This is only an integration smoke stage,
 not a sample size suitable for scientific claims. No live API call is made by
 the unit tests.
 
+Select benchmark history explicitly with `--benchmark er0`,
+`--benchmark er1_v1`, or `--benchmark er1_v2`. The older `--benchmark er1`
+spelling remains an alias for V1 and is never silently redirected to V2. A
+no-network V2 interface smoke run is:
+
+```bash
+python -m scripts.demo_llm_agent --mock --benchmark er1_v2 --condition both --budget 2 --repetitions 1
+```
+
 ## Beliefs and deterministic likelihoods
 
 `HypothesisBeliefs` is an immutable normalized distribution over exactly three
@@ -377,8 +421,22 @@ python -m scripts.demo_diagnostics
 python -m scripts.demo_policy_evaluation
 python -m scripts.demo_llm_agent --mock --condition both --budget 2 --repetitions 1
 python -m scripts.demo_er1_oracle --budget 5 --threshold 0.90 --seed 0
-python -m scripts.demo_llm_agent --mock --benchmark er1 --condition both --budget 5 --repetitions 1
+python -m scripts.demo_llm_agent --mock --benchmark er1_v1 --condition both --budget 5 --repetitions 1
+python -m scripts.demo_llm_agent --mock --benchmark er1_v2 --condition both --budget 5 --repetitions 1
+python -m scripts.demo_er1_v2_sanity --seeds 100
 ```
+
+The full fixed-grid V2 oracle calibration is explicitly versioned and writes
+only `er1_v2_oracle_*` artifacts. It compares matching cells against the
+existing V1 CSV artifacts without modifying them:
+
+```bash
+python -m scripts.calibrate_er1_v2_oracle
+```
+
+The default grid is 60,000 no-network oracle episodes: four hypotheses, five
+budgets, three thresholds, and 1,000 episode seeds. This command imports no LLM
+or provider adapter and never makes a network request.
 
 Minimal API example:
 

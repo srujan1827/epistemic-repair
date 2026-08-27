@@ -16,6 +16,11 @@ from epistemic_repair import (
     create_llm_client,
     run_llm_smoke,
 )
+from epistemic_repair.er1.config import ER1_HYPOTHESES
+from epistemic_repair.evaluation.er1_llm_runner import ER1LLMEpisodeResult
+from epistemic_repair.evaluation.er1_llm_smoke import run_er1_llm_smoke
+from epistemic_repair.er1_v2.llm_runner import ER1V2LLMEpisodeResult
+from epistemic_repair.er1_v2.llm_smoke import run_er1_v2_llm_smoke
 from epistemic_repair.llm.sanitize import sanitize_text
 
 
@@ -25,16 +30,39 @@ FAILURE_SELECTIONS: dict[str, tuple[FailureMode, ...]] = {
     "missing_latent_variable": (FailureMode.MISSING_LATENT_VARIABLE,),
     "all": HYPOTHESES,
 }
+ER1_FAILURE_SELECTIONS: dict[str, tuple[FailureMode, ...]] = {
+    "no_structural_change": (FailureMode.NO_STRUCTURAL_CHANGE,),
+    "world_shift": (FailureMode.WORLD_SHIFT,),
+    "sensor_corruption": (FailureMode.SENSOR_CORRUPTION,),
+    "missing_latent_variable": (FailureMode.MISSING_LATENT_VARIABLE,),
+    "all": ER1_HYPOTHESES,
+}
 
 
-def selected_failure_modes(selection: str) -> tuple[FailureMode, ...]:
+def selected_failure_modes(
+    selection: str,
+    benchmark: str = "er0",
+) -> tuple[FailureMode, ...]:
     """Return the failure modes selected by a CLI value."""
-    return FAILURE_SELECTIONS[selection]
+    selections = (
+        ER1_FAILURE_SELECTIONS
+        if benchmark in ("er1", "er1_v1", "er1_v2")
+        else FAILURE_SELECTIONS
+    )
+    if selection not in selections:
+        raise ValueError(f"{selection} is not available for {benchmark}")
+    return selections[selection]
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse provider, model, condition, and call-control configuration."""
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--benchmark",
+        choices=("er0", "er1", "er1_v1", "er1_v2"),
+        default="er0",
+        help="Benchmark version; er1 remains an alias for historical er1_v1.",
+    )
     parser.add_argument("--provider", default="gemini", choices=("gemini",))
     parser.add_argument("--model", default=DEFAULT_MODEL_ID)
     parser.add_argument("--condition", choices=("full", "planner", "both"), default="both")
@@ -44,6 +72,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "world_shift",
             "sensor_corruption",
             "missing_latent_variable",
+            "no_structural_change",
             "all",
         ),
         default="all",
@@ -74,7 +103,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def print_attempt_history(
-    episode: LLMEpisodeResult,
+    episode: LLMEpisodeResult | ER1LLMEpisodeResult | ER1V2LLMEpisodeResult,
     *,
     verbose: bool = False,
 ) -> None:
@@ -127,11 +156,15 @@ def main() -> None:
             LLMCondition.PLANNER_ONLY,
         ),
     }[args.condition]
-    failure_modes = selected_failure_modes(args.failure)
+    try:
+        failure_modes = selected_failure_modes(args.failure, args.benchmark)
+    except ValueError as error:
+        raise SystemExit(f"Configuration error: {error}") from error
     episode_count = len(failure_modes) * args.repetitions * len(conditions)
 
     print(f"provider: {config.provider}{' (mocked transport)' if args.mock else ''}")
     print(f"model: {config.model_id}")
+    print(f"benchmark: {args.benchmark}")
     print(f"condition: {args.condition}")
     print(f"failure: {args.failure}")
     print(f"budget: {args.budget}")
@@ -142,15 +175,36 @@ def main() -> None:
     except LLMConfigurationError as error:
         raise SystemExit(f"Configuration error: {error}") from error
 
-    results = run_llm_smoke(
-        client,
-        config,
-        conditions=conditions,
-        repetitions=args.repetitions,
-        experiment_budget=args.budget,
-        base_episode_seed=args.seed,
-        failure_modes=failure_modes,
-    )
+    if args.benchmark in ("er1", "er1_v1"):
+        results = run_er1_llm_smoke(
+            client,
+            config,
+            conditions=conditions,
+            repetitions=args.repetitions,
+            experiment_budget=args.budget,
+            base_episode_seed=args.seed,
+            failure_modes=failure_modes,
+        )
+    elif args.benchmark == "er1_v2":
+        results = run_er1_v2_llm_smoke(
+            client,
+            config,
+            conditions=conditions,
+            repetitions=args.repetitions,
+            experiment_budget=args.budget,
+            base_episode_seed=args.seed,
+            failure_modes=failure_modes,
+        )
+    else:
+        results = run_llm_smoke(
+            client,
+            config,
+            conditions=conditions,
+            repetitions=args.repetitions,
+            experiment_budget=args.budget,
+            base_episode_seed=args.seed,
+            failure_modes=failure_modes,
+        )
     for condition_result in results:
         print(f"\n{condition_result.condition.value}")
         for episode in condition_result.episodes:
@@ -182,6 +236,13 @@ def main() -> None:
             f"mean_regret={summary.mean_action_regret:.6f} "
             f"oracle_agreement={summary.oracle_action_agreement:.3f}"
         )
+        if args.benchmark in ("er1", "er1_v1", "er1_v2"):
+            print(
+                "  structural metrics: "
+                f"false_structural={summary.false_structural_diagnosis_rate:.3f} "
+                f"missed_structural={summary.missed_structural_failure_rate:.3f} "
+                f"premature={summary.premature_diagnosis_rate:.3f}"
+            )
 
 
 if __name__ == "__main__":

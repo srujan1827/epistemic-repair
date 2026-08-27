@@ -13,11 +13,25 @@ from epistemic_repair.policies.views import (
     OraclePolicyView,
 )
 from epistemic_repair.policies.llm import (
+    ER1FullAutonomousLLMPolicy,
+    ER1PlannerOnlyLLMPolicy,
     FullAutonomousLLMPolicy,
     LLMAttemptRecord,
     LLMAttemptStatus,
     LLMPolicyResult,
     PlannerOnlyLLMPolicy,
+)
+from epistemic_repair.policies.stochastic import (
+    StochasticBenchmarkDiagnosticPolicy,
+    StochasticDiagnosticPolicy,
+    StochasticOracleDiagnosticPolicy,
+    StochasticOracleInformationGainPolicy,
+    StochasticRandomDiagnosticPolicy,
+)
+from epistemic_repair.policies.stochastic_views import (
+    StochasticAgentExperimentRecord,
+    StochasticBenchmarkAgentView,
+    StochasticOraclePolicyView,
 )
 
 __all__ = [
@@ -25,6 +39,8 @@ __all__ = [
     "BenchmarkAgentView",
     "BenchmarkDiagnosticPolicy",
     "DiagnosticPolicy",
+    "ER1FullAutonomousLLMPolicy",
+    "ER1PlannerOnlyLLMPolicy",
     "FullAutonomousLLMPolicy",
     "LLMAttemptRecord",
     "LLMAttemptStatus",
@@ -34,4 +50,12 @@ __all__ = [
     "OraclePolicyView",
     "PlannerOnlyLLMPolicy",
     "RandomDiagnosticPolicy",
+    "StochasticAgentExperimentRecord",
+    "StochasticBenchmarkAgentView",
+    "StochasticBenchmarkDiagnosticPolicy",
+    "StochasticDiagnosticPolicy",
+    "StochasticOracleDiagnosticPolicy",
+    "StochasticOracleInformationGainPolicy",
+    "StochasticOraclePolicyView",
+    "StochasticRandomDiagnosticPolicy",
 ]
