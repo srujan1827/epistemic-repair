@@ -8,13 +8,13 @@ from epistemic_repair.er1_v2.llm_policy import (
     ER1V2FullAutonomousLLMPolicy,
     ER1V2PlannerOnlyLLMPolicy,
 )
+from epistemic_repair.er1_v2.llm_metrics import (
+    ER1V2LLMConditionSummary,
+    summarize_er1_v2_llm_results,
+)
 from epistemic_repair.er1_v2.llm_runner import (
     ER1V2LLMEpisodeResult,
     ER1V2LLMEpisodeRunner,
-)
-from epistemic_repair.evaluation.er1_llm_metrics import (
-    ER1LLMConditionSummary,
-    summarize_er1_llm_results,
 )
 from epistemic_repair.failures.modes import FailureMode
 from epistemic_repair.llm.base import LLMClient
@@ -26,7 +26,7 @@ from epistemic_repair.llm.schemas import LLMCondition
 class ER1V2LLMSmokeResult:
     condition: LLMCondition
     episodes: tuple[ER1V2LLMEpisodeResult, ...]
-    summary: ER1LLMConditionSummary
+    summary: ER1V2LLMConditionSummary
 
 
 def run_er1_v2_llm_smoke(
@@ -39,6 +39,7 @@ def run_er1_v2_llm_smoke(
     ),
     repetitions: int = 3,
     experiment_budget: int = 5,
+    diagnosis_threshold: float = 0.90,
     base_episode_seed: int = 0,
     failure_modes: tuple[FailureMode, ...] = ER1_HYPOTHESES,
 ) -> tuple[ER1V2LLMSmokeResult, ...]:
@@ -61,6 +62,7 @@ def run_er1_v2_llm_smoke(
                 runner = ER1V2LLMEpisodeRunner(
                     condition=condition,
                     experiment_budget=experiment_budget,
+                    diagnosis_threshold=diagnosis_threshold,
                     episode_seed=base_episode_seed + episode_index,
                 )
                 episodes.append(runner.run(ER1V2BinaryMachine(), hypothesis, policy))
@@ -70,7 +72,7 @@ def run_er1_v2_llm_smoke(
             ER1V2LLMSmokeResult(
                 condition=condition,
                 episodes=episode_tuple,
-                summary=summarize_er1_llm_results(episode_tuple),
+                summary=summarize_er1_v2_llm_results(episode_tuple),
             )
         )
     return tuple(output)

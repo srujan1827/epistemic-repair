@@ -54,6 +54,21 @@ def selected_failure_modes(
     return selections[selection]
 
 
+def _diagnosis_threshold(value: str) -> float:
+    """Parse a posterior threshold constrained to the interval (0, 1]."""
+    try:
+        threshold = float(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(
+            "diagnosis threshold must be a number"
+        ) from error
+    if not 0.0 < threshold <= 1.0:
+        raise argparse.ArgumentTypeError(
+            "diagnosis threshold must be in (0, 1]"
+        )
+    return threshold
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse provider, model, condition, and call-control configuration."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -78,6 +93,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default="all",
     )
     parser.add_argument("--budget", type=int, default=2)
+    parser.add_argument(
+        "--diagnosis-threshold",
+        type=_diagnosis_threshold,
+        default=0.90,
+        help=(
+            "ER-1 V2 normative diagnosis threshold; historical benchmarks "
+            "retain their existing behavior."
+        ),
+    )
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--thinking-level", default="medium")
     parser.add_argument(
@@ -168,6 +192,8 @@ def main() -> None:
     print(f"condition: {args.condition}")
     print(f"failure: {args.failure}")
     print(f"budget: {args.budget}")
+    if args.benchmark == "er1_v2":
+        print(f"diagnosis threshold: {args.diagnosis_threshold}")
     print(f"number of episodes: {episode_count}")
 
     try:
@@ -182,6 +208,7 @@ def main() -> None:
             conditions=conditions,
             repetitions=args.repetitions,
             experiment_budget=args.budget,
+            diagnosis_threshold=args.diagnosis_threshold,
             base_episode_seed=args.seed,
             failure_modes=failure_modes,
         )
@@ -219,29 +246,63 @@ def main() -> None:
                 if episode.final_diagnosis is not None
                 else "NONE"
             )
-            print(
-                f"  seed={episode.run_metadata.episode_seed} "
-                f"truth={truth} actions={actions} diagnosis={diagnosis} "
-                f"success={episode.success_within_budget} "
-                f"experiments={episode.experiments_used} "
-                f"regret={episode.cumulative_action_regret:.6f} "
-                f"retries={episode.total_retries}"
-            )
+            if args.benchmark == "er1_v2":
+                assert isinstance(episode, ER1V2LLMEpisodeResult)
+                print(
+                    f"  seed={episode.run_metadata.episode_seed} "
+                    f"truth={truth} actions={actions} diagnosis={diagnosis} "
+                    f"diagnosis_correct={episode.diagnosis_correct} "
+                    f"within_budget={episode.diagnosed_correctly_within_budget} "
+                    f"threshold_success={episode.threshold_qualified_success} "
+                    f"premature={episode.premature_diagnosis} "
+                    "normative_diagnosis_probability="
+                    f"{episode.normative_probability_of_final_diagnosis} "
+                    f"experiments={episode.experiments_used} "
+                    f"regret={episode.cumulative_action_regret:.6f} "
+                    f"retries={episode.total_retries}"
+                )
+            else:
+                print(
+                    f"  seed={episode.run_metadata.episode_seed} "
+                    f"truth={truth} actions={actions} diagnosis={diagnosis} "
+                    f"success={episode.success_within_budget} "
+                    f"experiments={episode.experiments_used} "
+                    f"regret={episode.cumulative_action_regret:.6f} "
+                    f"retries={episode.total_retries}"
+                )
             print_attempt_history(episode, verbose=args.verbose_attempts)
         summary = condition_result.summary
-        print(
-            f"  aggregate: accuracy={summary.diagnosis_accuracy:.3f} "
-            f"success={summary.success_within_budget:.3f} "
-            f"mean_experiments={summary.mean_experiments:.3f} "
-            f"mean_regret={summary.mean_action_regret:.6f} "
-            f"oracle_agreement={summary.oracle_action_agreement:.3f}"
-        )
+        if args.benchmark == "er1_v2":
+            print(
+                f"  aggregate: accuracy={summary.diagnosis_accuracy:.3f} "
+                "within_budget="
+                f"{summary.diagnosed_correctly_within_budget:.3f} "
+                "threshold_success="
+                f"{summary.threshold_qualified_success:.3f} "
+                f"premature={summary.premature_diagnosis_rate:.3f} "
+                f"mean_experiments={summary.mean_experiments:.3f} "
+                f"mean_regret={summary.mean_action_regret:.6f} "
+                f"oracle_agreement={summary.oracle_action_agreement:.3f}"
+            )
+        else:
+            print(
+                f"  aggregate: accuracy={summary.diagnosis_accuracy:.3f} "
+                f"success={summary.success_within_budget:.3f} "
+                f"mean_experiments={summary.mean_experiments:.3f} "
+                f"mean_regret={summary.mean_action_regret:.6f} "
+                f"oracle_agreement={summary.oracle_action_agreement:.3f}"
+            )
         if args.benchmark in ("er1", "er1_v1", "er1_v2"):
+            suffix = (
+                ""
+                if args.benchmark == "er1_v2"
+                else f" premature={summary.premature_diagnosis_rate:.3f}"
+            )
             print(
                 "  structural metrics: "
                 f"false_structural={summary.false_structural_diagnosis_rate:.3f} "
-                f"missed_structural={summary.missed_structural_failure_rate:.3f} "
-                f"premature={summary.premature_diagnosis_rate:.3f}"
+                f"missed_structural={summary.missed_structural_failure_rate:.3f}"
+                f"{suffix}"
             )
 
 

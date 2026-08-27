@@ -426,6 +426,21 @@ python -m scripts.demo_llm_agent --mock --benchmark er1_v2 --condition both --bu
 python -m scripts.demo_er1_v2_sanity --seeds 100
 ```
 
+For ER-1 V2 LLM runs, `--diagnosis-threshold` controls the normative threshold
+used for premature-diagnosis evaluation and defaults to `0.90`. It is threaded
+only into the V2 runner, so ER-0 and ER-1 V1 retain their historical behavior.
+An episode budget of `B` can require up to `B+1` model decision calls when the
+model uses all `B` experiments and diagnoses on the following turn; configure
+`--max-decision-calls` independently when running that design.
+
+V2 LLM evaluation keeps four concepts separate: raw diagnosis correctness,
+correct diagnosis within the bounded episode, threshold-qualified success, and
+premature diagnosis. Threshold qualification and prematurity use the normative
+Bayesian probability of the model's chosen diagnosis at the diagnosis turn—not
+the model's stated confidence and not the maximum posterior of some other
+hypothesis. The historical `success_within_budget` field is preserved, with the
+clearer V2 alias `diagnosed_correctly_within_budget`.
+
 The full fixed-grid V2 oracle calibration is explicitly versioned and writes
 only `er1_v2_oracle_*` artifacts. It compares matching cells against the
 existing V1 CSV artifacts without modifying them:

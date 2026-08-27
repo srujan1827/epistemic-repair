@@ -41,6 +41,18 @@ class ER1V2LLMEvaluationMetadata:
 
     hidden_failure_mode: FailureMode
     episode_seed: int
+    diagnosis_threshold: float
+
+
+@dataclass(frozen=True, slots=True)
+class ER1V2DiagnosisEvaluation:
+    """Orthogonal correctness, budget, threshold-support, and timing labels."""
+
+    diagnosis_correct: bool
+    diagnosed_correctly_within_budget: bool
+    threshold_qualified_success: bool
+    premature_diagnosis: bool
+    normative_probability_of_final_diagnosis: float | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,11 +88,49 @@ class ER1V2LLMEpisodeResult:
     cumulative_action_regret: float
     oracle_action_agreements: int
     success_within_budget: bool
+    threshold_qualified_success: bool
     premature_diagnosis: bool
+    normative_probability_of_final_diagnosis: float | None
 
     @property
     def diagnosis_correct(self) -> bool:
         return self.final_diagnosis is self.evaluation_metadata.hidden_failure_mode
+
+    @property
+    def diagnosed_correctly_within_budget(self) -> bool:
+        """Explicit V2 label for the historical success_within_budget field."""
+        return self.success_within_budget
+
+
+def evaluate_er1_v2_diagnosis(
+    *,
+    final_diagnosis: FailureMode | None,
+    hidden_failure_mode: FailureMode,
+    normative_beliefs: StochasticHypothesisBeliefs,
+    diagnosis_threshold: float,
+    termination_reason: LLMTerminationReason,
+) -> ER1V2DiagnosisEvaluation:
+    """Classify a V2 diagnosis using support for the chosen hypothesis itself."""
+    if not 0.0 < diagnosis_threshold <= 1.0:
+        raise ValueError("diagnosis_threshold must be in (0, 1]")
+    if final_diagnosis is None:
+        return ER1V2DiagnosisEvaluation(
+            diagnosis_correct=False,
+            diagnosed_correctly_within_budget=False,
+            threshold_qualified_success=False,
+            premature_diagnosis=False,
+            normative_probability_of_final_diagnosis=None,
+        )
+    support = normative_beliefs.probability(final_diagnosis)
+    correct = final_diagnosis is hidden_failure_mode
+    diagnosed = termination_reason is LLMTerminationReason.DIAGNOSED
+    return ER1V2DiagnosisEvaluation(
+        diagnosis_correct=correct,
+        diagnosed_correctly_within_budget=correct and diagnosed,
+        threshold_qualified_success=correct and support >= diagnosis_threshold,
+        premature_diagnosis=support < diagnosis_threshold,
+        normative_probability_of_final_diagnosis=support,
+    )
 
 
 ER1V2LLMPolicy = ER1V2FullAutonomousLLMPolicy | ER1V2PlannerOnlyLLMPolicy
@@ -129,7 +179,6 @@ class ER1V2LLMEpisodeRunner:
         trace: list[ER1V2LLMTurnTrace] = []
         diagnosis = None
         confidence = None
-        premature = False
         termination = LLMTerminationReason.DECISION_CALL_BUDGET_EXHAUSTED
 
         while len(trace) < config.max_decision_calls:
@@ -151,7 +200,6 @@ class ER1V2LLMEpisodeRunner:
             belief_error = self._belief_error(decision, beliefs)
             if decision.decision is DecisionType.DIAGNOSE:
                 diagnosis = decision.diagnosis
-                premature = beliefs.confidence() < self._diagnosis_threshold
                 confidence = (
                     decision.confidence
                     if isinstance(decision, ER1FullAutonomousDecision)
@@ -190,6 +238,13 @@ class ER1V2LLMEpisodeRunner:
             context = next_context
 
         truth = env.get_ground_truth().failure_mode
+        diagnosis_evaluation = evaluate_er1_v2_diagnosis(
+            final_diagnosis=diagnosis,
+            hidden_failure_mode=truth,
+            normative_beliefs=beliefs,
+            diagnosis_threshold=self._diagnosis_threshold,
+            termination_reason=termination,
+        )
         now = datetime.now(timezone.utc).isoformat()
         metadata = LLMRunMetadata(
             provider=config.provider,
@@ -207,7 +262,11 @@ class ER1V2LLMEpisodeRunner:
         )
         return ER1V2LLMEpisodeResult(
             run_metadata=metadata,
-            evaluation_metadata=ER1V2LLMEvaluationMetadata(truth, self._episode_seed),
+            evaluation_metadata=ER1V2LLMEvaluationMetadata(
+                truth,
+                self._episode_seed,
+                self._diagnosis_threshold,
+            ),
             initial_observation=trigger,
             initial_beliefs=initial_beliefs,
             trace=tuple(trace),
@@ -219,8 +278,16 @@ class ER1V2LLMEpisodeRunner:
             total_retries=sum(turn.policy_result.retry_count for turn in trace),
             cumulative_action_regret=sum(turn.action_regret or 0.0 for turn in trace),
             oracle_action_agreements=sum(turn.oracle_action_agreement is True for turn in trace),
-            success_within_budget=diagnosis is truth and termination is LLMTerminationReason.DIAGNOSED,
-            premature_diagnosis=premature,
+            success_within_budget=(
+                diagnosis_evaluation.diagnosed_correctly_within_budget
+            ),
+            threshold_qualified_success=(
+                diagnosis_evaluation.threshold_qualified_success
+            ),
+            premature_diagnosis=diagnosis_evaluation.premature_diagnosis,
+            normative_probability_of_final_diagnosis=(
+                diagnosis_evaluation.normative_probability_of_final_diagnosis
+            ),
         )
 
     def _request(self, policy, view, beliefs):
