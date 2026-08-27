@@ -1,0 +1,782 @@
+{
+  "budget": 5,
+  "by_hypothesis": {
+    "MISSING_LATENT_VARIABLE": {
+      "correct_map_without_threshold": {
+        "final_map_diagnosis": "MISSING_LATENT_VARIABLE",
+        "final_true_posterior": 0.8504161618094119,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 14,
+        "termination_reason": "BUDGET_EXHAUSTED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 1
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.12757146115250118,
+              "NO_STRUCTURAL_CHANGE": 0.00251444427550555,
+              "SENSOR_CORRUPTION": 0.08626083320662917,
+              "WORLD_SHIFT": 0.7836532613653642
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4098964312758006,
+              "NO_STRUCTURAL_CHANGE": 0.008079093285131537,
+              "SENSOR_CORRUPTION": 0.2771623635164513,
+              "WORLD_SHIFT": 0.3048621119226165
+            },
+            "step": 3
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.5599299808324493,
+              "NO_STRUCTURAL_CHANGE": 0.011036267220495662,
+              "SENSOR_CORRUPTION": 0.37861153464598385,
+              "WORLD_SHIFT": 0.05042221730107117
+            },
+            "step": 4
+          },
+          {
+            "action": "REPEAT_TRIAL",
+            "observation": {
+              "primary_o": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.8504161618094119,
+              "NO_STRUCTURAL_CHANGE": 0.016761774385439444,
+              "SENSOR_CORRUPTION": 0.12035542699445341,
+              "WORLD_SHIFT": 0.012466636810695188
+            },
+            "step": 5
+          }
+        ],
+        "true_hypothesis": "MISSING_LATENT_VARIABLE"
+      },
+      "incorrect_map": {
+        "final_map_diagnosis": "WORLD_SHIFT",
+        "final_true_posterior": 0.01907256363898656,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 5,
+        "termination_reason": "THRESHOLD_REACHED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 1
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.12757146115250118,
+              "NO_STRUCTURAL_CHANGE": 0.00251444427550555,
+              "SENSOR_CORRUPTION": 0.08626083320662917,
+              "WORLD_SHIFT": 0.7836532613653642
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.01907256363898656,
+              "NO_STRUCTURAL_CHANGE": 0.0003759218404180268,
+              "SENSOR_CORRUPTION": 0.012896420688626592,
+              "WORLD_SHIFT": 0.9676550938319688
+            },
+            "step": 3
+          }
+        ],
+        "true_hypothesis": "MISSING_LATENT_VARIABLE"
+      },
+      "quick_threshold_success": {
+        "final_map_diagnosis": "MISSING_LATENT_VARIABLE",
+        "final_true_posterior": 0.9402180853004488,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 0,
+        "termination_reason": "THRESHOLD_REACHED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 1
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.8287313582827511,
+              "NO_STRUCTURAL_CHANGE": 0.01633436507617478,
+              "SENSOR_CORRUPTION": 0.02002452064155645,
+              "WORLD_SHIFT": 0.13490975599951766
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.9402180853004488,
+              "NO_STRUCTURAL_CHANGE": 0.01853177788317706,
+              "SENSOR_CORRUPTION": 0.02271835893319712,
+              "WORLD_SHIFT": 0.018531777883177062
+            },
+            "step": 3
+          }
+        ],
+        "true_hypothesis": "MISSING_LATENT_VARIABLE"
+      }
+    },
+    "NO_STRUCTURAL_CHANGE": {
+      "correct_map_without_threshold": null,
+      "incorrect_map": {
+        "final_map_diagnosis": "MISSING_LATENT_VARIABLE",
+        "final_true_posterior": 0.01853177788317706,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 2,
+        "termination_reason": "THRESHOLD_REACHED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 1
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.8287313582827511,
+              "NO_STRUCTURAL_CHANGE": 0.01633436507617478,
+              "SENSOR_CORRUPTION": 0.02002452064155645,
+              "WORLD_SHIFT": 0.13490975599951766
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.9402180853004488,
+              "NO_STRUCTURAL_CHANGE": 0.01853177788317706,
+              "SENSOR_CORRUPTION": 0.02271835893319712,
+              "WORLD_SHIFT": 0.018531777883177062
+            },
+            "step": 3
+          }
+        ],
+        "true_hypothesis": "NO_STRUCTURAL_CHANGE"
+      },
+      "quick_threshold_success": {
+        "final_map_diagnosis": "NO_STRUCTURAL_CHANGE",
+        "final_true_posterior": 0.935670669208673,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 0,
+        "termination_reason": "THRESHOLD_REACHED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.08912943344081067,
+              "NO_STRUCTURAL_CHANGE": 0.11983724857976356,
+              "SENSOR_CORRUPTION": 0.7019038845386151,
+              "WORLD_SHIFT": 0.08912943344081067
+            },
+            "step": 1
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.012796333897487265,
+              "NO_STRUCTURAL_CHANGE": 0.14210106927989954,
+              "SENSOR_CORRUPTION": 0.8323062629251259,
+              "WORLD_SHIFT": 0.012796333897487265
+            },
+            "step": 2
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.038638121320492186,
+              "NO_STRUCTURAL_CHANGE": 0.4290696381161609,
+              "SENSOR_CORRUPTION": 0.5260023138367552,
+              "WORLD_SHIFT": 0.0062899267265917515
+            },
+            "step": 3
+          },
+          {
+            "action": "REPEAT_TRIAL",
+            "observation": {
+              "primary_o": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.06675265822938581,
+              "NO_STRUCTURAL_CHANGE": 0.7412766959397677,
+              "SENSOR_CORRUPTION": 0.19020164623471894,
+              "WORLD_SHIFT": 0.0017689995961275855
+            },
+            "step": 4
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "B",
+              "primary_o": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.01371642136083819,
+              "NO_STRUCTURAL_CHANGE": 0.935670669208673,
+              "SENSOR_CORRUPTION": 0.050249413136988844,
+              "WORLD_SHIFT": 0.00036349629349976826
+            },
+            "step": 5
+          }
+        ],
+        "true_hypothesis": "NO_STRUCTURAL_CHANGE"
+      }
+    },
+    "SENSOR_CORRUPTION": {
+      "correct_map_without_threshold": {
+        "final_map_diagnosis": "SENSOR_CORRUPTION",
+        "final_true_posterior": 0.7157450500678579,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 2,
+        "termination_reason": "BUDGET_EXHAUSTED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 1
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.12757146115250118,
+              "NO_STRUCTURAL_CHANGE": 0.00251444427550555,
+              "SENSOR_CORRUPTION": 0.08626083320662917,
+              "WORLD_SHIFT": 0.7836532613653642
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4098964312758006,
+              "NO_STRUCTURAL_CHANGE": 0.008079093285131537,
+              "SENSOR_CORRUPTION": 0.2771623635164513,
+              "WORLD_SHIFT": 0.3048621119226165
+            },
+            "step": 3
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.5599299808324493,
+              "NO_STRUCTURAL_CHANGE": 0.011036267220495662,
+              "SENSOR_CORRUPTION": 0.37861153464598385,
+              "WORLD_SHIFT": 0.05042221730107117
+            },
+            "step": 4
+          },
+          {
+            "action": "REPEAT_TRIAL",
+            "observation": {
+              "primary_o": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.18072257983506282,
+              "NO_STRUCTURAL_CHANGE": 0.003562057314509007,
+              "SENSOR_CORRUPTION": 0.7157450500678579,
+              "WORLD_SHIFT": 0.0999703127825703
+            },
+            "step": 5
+          }
+        ],
+        "true_hypothesis": "SENSOR_CORRUPTION"
+      },
+      "incorrect_map": {
+        "final_map_diagnosis": "MISSING_LATENT_VARIABLE",
+        "final_true_posterior": 0.2771623635164513,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 5,
+        "termination_reason": "BUDGET_EXHAUSTED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.08912943344081067,
+              "NO_STRUCTURAL_CHANGE": 0.11983724857976356,
+              "SENSOR_CORRUPTION": 0.7019038845386151,
+              "WORLD_SHIFT": 0.08912943344081067
+            },
+            "step": 1
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+              "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+              "SENSOR_CORRUPTION": 0.30597014925373134,
+              "WORLD_SHIFT": 0.3208955223880597
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 3
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.12757146115250118,
+              "NO_STRUCTURAL_CHANGE": 0.00251444427550555,
+              "SENSOR_CORRUPTION": 0.08626083320662917,
+              "WORLD_SHIFT": 0.7836532613653642
+            },
+            "step": 4
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4098964312758006,
+              "NO_STRUCTURAL_CHANGE": 0.008079093285131537,
+              "SENSOR_CORRUPTION": 0.2771623635164513,
+              "WORLD_SHIFT": 0.3048621119226165
+            },
+            "step": 5
+          }
+        ],
+        "true_hypothesis": "SENSOR_CORRUPTION"
+      },
+      "quick_threshold_success": {
+        "final_map_diagnosis": "SENSOR_CORRUPTION",
+        "final_true_posterior": 0.9542906546822937,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 0,
+        "termination_reason": "THRESHOLD_REACHED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.08912943344081067,
+              "NO_STRUCTURAL_CHANGE": 0.11983724857976356,
+              "SENSOR_CORRUPTION": 0.7019038845386151,
+              "WORLD_SHIFT": 0.08912943344081067
+            },
+            "step": 1
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.012796333897487265,
+              "NO_STRUCTURAL_CHANGE": 0.14210106927989954,
+              "SENSOR_CORRUPTION": 0.8323062629251259,
+              "WORLD_SHIFT": 0.012796333897487265
+            },
+            "step": 2
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.0025049395811710053,
+              "NO_STRUCTURAL_CHANGE": 0.02781691973791338,
+              "SENSOR_CORRUPTION": 0.9542906546822937,
+              "WORLD_SHIFT": 0.015387485998621888
+            },
+            "step": 3
+          }
+        ],
+        "true_hypothesis": "SENSOR_CORRUPTION"
+      }
+    },
+    "WORLD_SHIFT": {
+      "correct_map_without_threshold": {
+        "final_map_diagnosis": "WORLD_SHIFT",
+        "final_true_posterior": 0.4683501025691121,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 15,
+        "termination_reason": "BUDGET_EXHAUSTED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.08912943344081067,
+              "NO_STRUCTURAL_CHANGE": 0.11983724857976356,
+              "SENSOR_CORRUPTION": 0.7019038845386151,
+              "WORLD_SHIFT": 0.08912943344081067
+            },
+            "step": 1
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+              "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+              "SENSOR_CORRUPTION": 0.30597014925373134,
+              "WORLD_SHIFT": 0.3208955223880597
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.08912943344081067,
+              "NO_STRUCTURAL_CHANGE": 0.11983724857976356,
+              "SENSOR_CORRUPTION": 0.7019038845386151,
+              "WORLD_SHIFT": 0.08912943344081067
+            },
+            "step": 3
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+              "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+              "SENSOR_CORRUPTION": 0.30597014925373134,
+              "WORLD_SHIFT": 0.3208955223880597
+            },
+            "step": 4
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 5
+          }
+        ],
+        "true_hypothesis": "WORLD_SHIFT"
+      },
+      "incorrect_map": {
+        "final_map_diagnosis": "MISSING_LATENT_VARIABLE",
+        "final_true_posterior": 0.3048621119226165,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 3,
+        "termination_reason": "BUDGET_EXHAUSTED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 1
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.12757146115250118,
+              "NO_STRUCTURAL_CHANGE": 0.00251444427550555,
+              "SENSOR_CORRUPTION": 0.08626083320662917,
+              "WORLD_SHIFT": 0.7836532613653642
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4098964312758006,
+              "NO_STRUCTURAL_CHANGE": 0.008079093285131537,
+              "SENSOR_CORRUPTION": 0.2771623635164513,
+              "WORLD_SHIFT": 0.3048621119226165
+            },
+            "step": 3
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.12757146115250118,
+              "NO_STRUCTURAL_CHANGE": 0.0025144442755055505,
+              "SENSOR_CORRUPTION": 0.08626083320662918,
+              "WORLD_SHIFT": 0.7836532613653642
+            },
+            "step": 4
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 1
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4098964312758006,
+              "NO_STRUCTURAL_CHANGE": 0.008079093285131539,
+              "SENSOR_CORRUPTION": 0.27716236351645135,
+              "WORLD_SHIFT": 0.3048621119226165
+            },
+            "step": 5
+          }
+        ],
+        "true_hypothesis": "WORLD_SHIFT"
+      },
+      "quick_threshold_success": {
+        "final_map_diagnosis": "WORLD_SHIFT",
+        "final_true_posterior": 0.9676550938319688,
+        "initial_posterior": {
+          "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+          "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+          "SENSOR_CORRUPTION": 0.30597014925373134,
+          "WORLD_SHIFT": 0.3208955223880597
+        },
+        "seed": 0,
+        "termination_reason": "THRESHOLD_REACHED",
+        "trace": [
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.4683501025691121,
+              "NO_STRUCTURAL_CHANGE": 0.009231220084008987,
+              "SENSOR_CORRUPTION": 0.05406857477776692,
+              "WORLD_SHIFT": 0.4683501025691121
+            },
+            "step": 1
+          },
+          {
+            "action": "CHANGE_CONTEXT",
+            "observation": {
+              "context": "A",
+              "primary_o": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.12757146115250118,
+              "NO_STRUCTURAL_CHANGE": 0.00251444427550555,
+              "SENSOR_CORRUPTION": 0.08626083320662917,
+              "WORLD_SHIFT": 0.7836532613653642
+            },
+            "step": 2
+          },
+          {
+            "action": "USE_TRUSTED_SENSOR",
+            "observation": {
+              "trusted_t": 0
+            },
+            "posterior": {
+              "MISSING_LATENT_VARIABLE": 0.01907256363898656,
+              "NO_STRUCTURAL_CHANGE": 0.0003759218404180268,
+              "SENSOR_CORRUPTION": 0.012896420688626592,
+              "WORLD_SHIFT": 0.9676550938319688
+            },
+            "step": 3
+          }
+        ],
+        "true_hypothesis": "WORLD_SHIFT"
+      }
+    }
+  },
+  "initial_posterior": {
+    "MISSING_LATENT_VARIABLE": 0.3208955223880597,
+    "NO_STRUCTURAL_CHANGE": 0.05223880597014926,
+    "SENSOR_CORRUPTION": 0.30597014925373134,
+    "WORLD_SHIFT": 0.3208955223880597
+  },
+  "threshold": 0.9
+}

@@ -9,7 +9,7 @@ model is appropriate after a real world shift, but harmful when the sensor is
 the faulty component. Likewise, an apparently broken rule may instead be an
 incomplete rule that omits a relevant latent variable.
 
-## Deterministic environment
+## ER-0: deterministic epistemic diagnosis
 
 The binary machine accepts an agent-chosen bit `X`, computes a true physical
 output `Y`, and returns sensor observation `O`. `Y` and optional latent variable
@@ -40,7 +40,70 @@ That observation alone cannot identify its cause. The simulator retains `Y`,
 `get_ground_truth()` evaluation interface. Agent code should receive only the
 `Observation(x, o)` returned by `step()`.
 
-## Active diagnostic experiments
+ER-0 remains a standalone deterministic benchmark. Its environment,
+likelihoods, three-hypothesis belief state, trusted-sensor semantics, prompts,
+and evaluation behavior are unchanged by ER-1.
+
+## ER-1: stochastic epistemic diagnosis
+
+ER-1 asks a harder question: did anything structurally fail at all? In a noisy
+world, adaptation can itself be harmful. An investigator must distinguish
+evidence of a structural failure from ordinary variation—most importantly, it
+must learn **when not to repair**.
+
+ER-1 is implemented by separate stochastic environment, likelihood, belief,
+policy-view, runner, and prompt modules. It adds the genuine competing
+hypothesis `NO_STRUCTURAL_CHANGE`, whose correct repair label is `NO_REPAIR`.
+The other repair mappings are unchanged.
+
+The centralized default generative parameters are:
+
+| Component | ER-1 probability |
+| --- | ---: |
+| Preferred physical relation | `0.90` |
+| Reliable primary sensor reports `O=Y` | `0.95` |
+| Corrupted primary sensor reports `O=1-Y` | `0.90` |
+| Trusted sensor reports `T=Y` | `0.99` |
+| Normative diagnosis threshold | `0.90` |
+
+`NO_STRUCTURAL_CHANGE` and `SENSOR_CORRUPTION` retain a physical process that
+prefers `Y=X`; `WORLD_SHIFT` prefers `Y=1-X`. `MISSING_LATENT_VARIABLE`
+prefers `Y=X` in context A and `Y=1-X` in context B. The reliable primary
+sensor applies to every hypothesis except sensor corruption, and all ordinary
+binary outcomes have non-zero probability.
+
+Every investigator is deliberately shown the same selected entry event,
+`X=1, O=0`, in context B. The environment constructs that visible event
+directly rather than rejection-sampling it. The normative initial belief state
+explicitly accounts for the selection:
+
+```text
+P(H | X=1,O=0) ∝ P(O=0 | X=1,H,context=B) P(H)
+```
+
+With equal `0.25` base priors, the anomaly likelihoods and conditioned beliefs
+are:
+
+| Hypothesis | `P(O=0 | X=1,H,B)` | Conditioned belief |
+| --- | ---: | ---: |
+| `NO_STRUCTURAL_CHANGE` | `0.14` | `0.052239` |
+| `WORLD_SHIFT` | `0.86` | `0.320896` |
+| `SENSOR_CORRUPTION` | `0.82` | `0.305970` |
+| `MISSING_LATENT_VARIABLE` | `0.86` | `0.320896` |
+
+The hidden initial `Y` is sampled from its appropriate conditional
+distribution given the selected observation. It is never agent-visible.
+Episodes use a private random generator reinitialized from the recorded episode
+seed, so the same seed and action sequence reproduce the same trajectory
+without depending on global random state.
+
+ER-1 changes the trusted action deliberately: `USE_TRUSTED_SENSOR` performs a
+new physical trial and returns noisy trusted observation `T`, not hidden `Y`.
+The `0.99` reliability makes it highly informative without allowing one
+measurement to collapse the posterior mathematically. ER-0 continues to return
+its existing perfect trusted measurement of `Y`.
+
+## ER-0 active diagnostic experiments
 
 The environment implements four typed diagnostic actions:
 
@@ -118,10 +181,15 @@ oracle action, or evaluation truth. Autonomous prompts contain no normative
 posterior at all. The benchmark may compare stated autonomous beliefs with the
 normative posterior after the fact, but never feeds that comparison back.
 
-Prompts are versioned as `binary_v0_001`. They request only a short
+ER-0 prompts remain versioned as `binary_v0_001`; ER-1 uses the separate
+`binary_er1_001` methodology. The ER-1 prompt describes process and sensor
+noise qualitatively, includes all four hypotheses, and warns against premature
+diagnosis. It does not reveal the `0.90`/`0.95`/`0.99` likelihood parameters.
+Planner-only may receive the current four-way posterior, but never a likelihood
+table or oracle recommendation. Prompts request only a short
 `reason_summary`; private chain-of-thought and provider thinking tokens are not
 collected. Structured responses may request one of the three benchmark actions
-or issue one of the three diagnoses. Malformed JSON, invalid probabilities,
+or issue a diagnosis valid for the selected benchmark. Malformed JSON, invalid probabilities,
 unsupported actions, contradictory fields, timeouts, rate limits, and provider
 errors are recorded explicitly rather than guessed around.
 
@@ -212,6 +280,55 @@ The change action deterministically switches to the other known context. Thus
 the initial transition is B to A, matching the benchmark likelihood table; a
 later change switches A back to B.
 
+## ER-1 likelihoods, policies, and metrics
+
+`StochasticLikelihoodModel` analytically computes every binary outcome
+distribution, soft Bayesian update, and expected information gain. It does not
+use realized entropy reduction to select actions. At the anomaly-conditioned
+initial posterior in context B, the default expected information gains are:
+
+| Action | Expected information gain |
+| --- | ---: |
+| `REPEAT_TRIAL` | `0.087597` bits |
+| `USE_TRUSTED_SENSOR` | `0.470190` bits |
+| `CHANGE_CONTEXT` | `0.368306` bits |
+
+Unlike ER-0, repeating a primary-sensor trial is informative. The stochastic
+oracle chooses maximum expected information gain with deterministic action-order
+tie-breaking and stops when posterior confidence reaches the configurable
+threshold or its budget is exhausted. It receives beliefs and the normative
+likelihood model, but never hidden ground truth. The restricted random baseline
+uses its own seed and receives only the safe ER-1 agent view.
+
+ER-1 supports budgets `1`, `2`, `3`, `5`, and `8` by default. Alongside
+accuracy, success, experiment count, action regret, and oracle-action agreement,
+its summaries report:
+
+- `false_structural_diagnosis_rate`: a structural diagnosis when truth is
+  `NO_STRUCTURAL_CHANGE`;
+- `missed_structural_failure_rate`: `NO_STRUCTURAL_CHANGE` diagnosed for a
+  structural truth; and
+- `premature_diagnosis_rate` for LLM episodes: diagnosis before the normative
+  posterior reaches the configured threshold.
+
+### ER-1 oracle calibration
+
+The no-network calibration script measures the stochastic oracle over budgets,
+confidence thresholds, hypotheses, and reproducible episode seeds. Its default
+grid is 60,000 episodes: four hypotheses × five budgets × three thresholds ×
+1,000 seeds.
+
+```bash
+python -m scripts.calibrate_er1_oracle
+```
+
+Use `--seeds`, `--budgets`, `--thresholds`, and `--output-dir` to run smaller
+validation grids. The script reports MAP accuracy separately from reaching the
+configured threshold on the correct hypothesis and writes aggregate CSV,
+confusion-matrix JSON, representative hard-case JSON, and a Markdown report.
+The calibration implementation contains no LLM/provider calls and makes no
+network requests.
+
 ## Policies and evaluation
 
 `OracleInformationGainPolicy` chooses the action with maximum expected
@@ -247,6 +364,8 @@ python -m scripts.demo_binary_world
 python -m scripts.demo_diagnostics
 python -m scripts.demo_policy_evaluation
 python -m scripts.demo_llm_agent --mock --condition both --budget 2 --repetitions 1
+python -m scripts.demo_er1_oracle --budget 5 --threshold 0.90 --seed 0
+python -m scripts.demo_llm_agent --mock --benchmark er1 --condition both --budget 5 --repetitions 1
 ```
 
 Minimal API example:
@@ -275,10 +394,11 @@ changed = env.run_experiment(
 
 ## Scope
 
-This repository currently contains the deterministic environment, explicit
-diagnostic experiment, normative belief, policy-baseline, evaluation, and LLM
-smoke layers. It does not execute repairs. Planned research stages, not
-implemented here, include:
+This repository contains both the standalone deterministic ER-0 benchmark and
+the separate stochastic ER-1 diagnosis benchmark, including seeded
+environments, normative beliefs, policy baselines, evaluation, and mocked/live
+LLM transport support. It does not execute repairs, and no live provider is
+called automatically. Planned research stages, not implemented here, include:
 
 - selective repair; and
-- noisy and larger causal environments.
+- larger causal environments.
