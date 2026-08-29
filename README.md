@@ -138,6 +138,88 @@ probabilities, investigation parameters, likelihood tables, information-gain
 values, repairs, or hidden state. Planner-only receives the current normative
 posterior; full-autonomous does not. V1 retains `binary_er1_001` unchanged.
 
+## ER-2 V0: minimal deterministic repair evaluation
+
+ER-2 isolates the question that follows diagnosis: can an agent choose and
+apply the smallest appropriate repair without damaging knowledge that remains
+correct? It reuses the four ER-1 V2 hypotheses and the existing typed repair
+operators. Diagnosis is supplied externally in this first version; ER-1 and
+ER-2 are not coupled yet.
+
+The repairable agent state has three independent components:
+
+| Component | Healthy initial state | Targeted repair |
+| --- | --- | --- |
+| Persistent world relationship | `Y=X` | `UPDATE_WORLD_MODEL` sets `Y=1-X` |
+| Primary-sensor calibration | `O=Y` | `RECALIBRATE_SENSOR` sets `O=1-Y` |
+| Context/latent representation | absent | `ADD_LATENT_VARIABLE` adds identity in A and inversion in B |
+
+`NO_REPAIR` is exact identity. Every operator mutates only its named component.
+The fixed held-out suite contains ten deterministic cases: four physical
+`X,context→Y` predictions, two direct sensor `Y→O` predictions, and four
+end-to-end `X,context→O` predictions. This separation exposes compensating
+wrong repairs. For example, changing the world model after sensor corruption
+can match corrupted end-to-end observations while making every physical
+prediction wrong.
+
+Affected cases are those changed by the true structural hypothesis. For
+`NO_STRUCTURAL_CHANGE`, which has no persistently changed region, two
+trigger-adjacent held-out probes are designated as the affected preservation
+check. Collateral damage is the signed quantity:
+
+```text
+pre-repair accuracy on unaffected cases
+- post-repair accuracy on unaffected cases
+```
+
+It is not clamped: positive values mean damage, zero means preservation, and
+negative values would mean improvement. The deterministic 4×4 repair matrix,
+five baselines, and technical report can be regenerated without any provider:
+
+```bash
+python -m scripts.demo_er2_repairs --overwrite
+python -m scripts.run_er2_llm_repair_selection --preflight-only --output-dir results/er2_llm_repair_selection_preflight
+python -m scripts.run_er1_v2_er2_end_to_end --preflight-only --output-dir results/er1_v2_er2_end_to_end_preflight
+```
+
+### ER-2 causal repair selection
+
+The small ER-2 LLM study treats the model only as a repair selector. It receives
+an externally supplied diagnosis, one frozen causal description, and four
+seed-permuted options labelled `A` through `D`. Each option describes a state
+mutation by its consequences; canonical repair enum names and the hidden
+option-to-repair mapping are absent from the prompt. Trusted Python translates
+the selected letter and invokes the existing deterministic ER-2 mutation and
+held-out evaluator.
+
+All four diagnosis descriptions and all four option descriptions are fixed
+versioned strings. `wording_audit.json` records the text, SHA-256 hashes, and
+40-cell exact-use checks; `permutation_audit.csv` verifies the seed-controlled
+mapping. Malformed structured output, provider failures, and rate limits are
+reported separately from valid wrong causal repairs.
+
+The live study is deliberately not run automatically. The runner checkpoints
+each cell and generates `episodes.csv`, `summary.csv`, `per_hypothesis.csv`,
+`wrong_repair_analysis.csv`, `permutation_audit.csv`, `wording_audit.json`,
+`traces.jsonl`, and `report.md`. The single frozen condition is
+`CAUSAL_REPAIR_SELECTION`; there are no prompt variants.
+
+### ER-1 V2 to ER-2 end-to-end evaluation
+
+The prospective end-to-end condition connects the unchanged ER-1 V2
+`FULL_AUTONOMOUS` investigation to the unchanged deterministic ER-2 repair
+mutation/evaluator. After the model diagnoses, a separate provider request sees
+only the final ER-1 benchmark-agent evidence record and the same frozen neutral
+repair descriptions used by the supplied-diagnosis control. It receives no
+benchmark-supplied diagnosis, causal interpretation, truth, normative posterior,
+oracle action, or held-out targets.
+
+The study keeps diagnosis, repair choice, behavioral recovery, and collateral
+damage separate. It additionally evaluates all four repairs counterfactually
+after each completed investigation without model calls. The resulting report
+does not pool the prospective study with the existing 40/40 supplied-diagnosis
+control.
+
 ## ER-0 active diagnostic experiments
 
 The environment implements four typed diagnostic actions:
@@ -424,6 +506,7 @@ python -m scripts.demo_er1_oracle --budget 5 --threshold 0.90 --seed 0
 python -m scripts.demo_llm_agent --mock --benchmark er1_v1 --condition both --budget 5 --repetitions 1
 python -m scripts.demo_llm_agent --mock --benchmark er1_v2 --condition both --budget 5 --repetitions 1
 python -m scripts.demo_er1_v2_sanity --seeds 100
+python -m scripts.demo_er2_repairs --overwrite
 ```
 
 For ER-1 V2 LLM runs, `--diagnosis-threshold` controls the normative threshold
@@ -479,11 +562,13 @@ changed = env.run_experiment(
 
 ## Scope
 
-This repository contains both the standalone deterministic ER-0 benchmark and
-the separate stochastic ER-1 diagnosis benchmark, including seeded
-environments, normative beliefs, policy baselines, evaluation, and mocked/live
-LLM transport support. It does not execute repairs, and no live provider is
-called automatically. Planned research stages, not implemented here, include:
+This repository contains the standalone deterministic ER-0 benchmark, the
+separate stochastic ER-1 diagnosis benchmark, and the minimal deterministic
+ER-2 repair-selection/evaluation layer plus a provider-neutral, externally
+diagnosed LLM repair-selection study. ER-2 executes explicit repairs only on
+its small predictive agent state; it is not coupled to ER-1 diagnosis
+uncertainty. No live provider is called automatically. Planned research stages,
+not implemented here, include:
 
-- selective repair; and
+- diagnosis-to-repair integration under uncertain diagnoses; and
 - larger causal environments.

@@ -43,7 +43,7 @@ def summarize_er1_v2_llm_results(
         raise ValueError("at least one ER-1 V2 LLM result is required")
     conditions = {result.run_metadata.condition for result in results}
     if len(conditions) != 1:
-        raise ValueError("FULL_AUTONOMOUS and PLANNER_ONLY cannot be pooled")
+        raise ValueError("different LLM conditions cannot be pooled")
     condition = next(iter(conditions))
     turns = [turn for result in results for turn in result.trace]
     action_turns = [turn for turn in turns if turn.experiment_record is not None]
@@ -120,7 +120,11 @@ def summarize_er1_v2_llm_results(
                 )
                 for turn in turns
             )
-            if condition is LLMCondition.FULL_AUTONOMOUS and turns
+            if condition in (
+                LLMCondition.FULL_AUTONOMOUS,
+                LLMCondition.THRESHOLD_AWARE_AUTONOMOUS,
+            )
+            and turns
             else None
         ),
         mean_final_confidence=mean(confidences) if confidences else None,

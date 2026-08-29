@@ -1,0 +1,2 @@
+group,episodes_completed,valid_selections,valid_correct_selections,valid_wrong_selections,scientific_model_failures,provider_failures,rate_limit_failures,repair_selection_accuracy,repair_success_rate,post_repair_accuracy,affected_region_accuracy,unaffected_region_accuracy,collateral_damage
+ALL,40,40,40,0,0,0,0,1.0,1.0,1,1,1,0

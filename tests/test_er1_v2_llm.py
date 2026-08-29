@@ -13,6 +13,7 @@ from epistemic_repair.er1_v2.environment import ER1V2BinaryMachine
 from epistemic_repair.er1_v2.llm_policy import (
     ER1V2FullAutonomousLLMPolicy,
     ER1V2PlannerOnlyLLMPolicy,
+    ER1V2ThresholdAwareAutonomousLLMPolicy,
 )
 from epistemic_repair.er1_v2.llm_runner import (
     ER1V2LLMEpisodeRunner,
@@ -31,8 +32,10 @@ from epistemic_repair.llm.schemas import LLMCondition
 from epistemic_repair.prompts.binary_er1 import BINARY_ER1_PROMPT_VERSION
 from epistemic_repair.prompts.binary_er1_v2 import (
     BINARY_ER1_V2_PROMPT_VERSION,
+    BINARY_ER1_V2_THRESHOLD_AWARE_PROMPT_VERSION,
     build_er1_v2_full_autonomous_prompt,
     build_er1_v2_planner_only_prompt,
+    build_er1_v2_threshold_aware_autonomous_prompt,
 )
 from scripts.demo_llm_agent import main, parse_args, selected_failure_modes
 
@@ -119,6 +122,103 @@ def test_planner_prompt_contains_posterior_but_no_likelihoods() -> None:
     assert "P(A0" not in prompt
     assert "0.300000" not in prompt
     assert "0.950000" not in prompt
+
+
+def test_threshold_aware_prompt_adds_only_explicit_stopping_rule() -> None:
+    full_prompt = build_er1_v2_full_autonomous_prompt(_view())
+    threshold_prompt = build_er1_v2_threshold_aware_autonomous_prompt(
+        _view(),
+        0.95,
+    )
+
+    instruction = (
+        "Do not issue a final diagnosis until your confidence in one hypothesis "
+        "is at least the configured diagnosis threshold of 0.95. If the "
+        "experiment budget is exhausted before reaching that confidence, make "
+        "your best-supported diagnosis."
+    )
+    assert instruction not in full_prompt
+    assert "0.95" not in full_prompt
+    assert instruction in threshold_prompt
+    assert BINARY_ER1_V2_THRESHOLD_AWARE_PROMPT_VERSION in threshold_prompt
+    assert "Authoritative current probabilities" not in threshold_prompt
+
+
+def test_threshold_aware_prompt_has_no_benchmark_leakage() -> None:
+    prompt = build_er1_v2_threshold_aware_autonomous_prompt(_view(), 0.95)
+    for forbidden in (
+        "P(A0",
+        "expected information gain",
+        "oracle action",
+        "hidden Y",
+        "hidden Z",
+        "UPDATE_WORLD_MODEL",
+        "RECALIBRATE_SENSOR",
+        "ADD_LATENT_VARIABLE",
+        "0.300000",
+        "0.700000",
+        "0.650000",
+        "0.990000",
+    ):
+        assert forbidden not in prompt
+
+
+def test_planner_prompt_remains_authoritative_and_threshold_agnostic() -> None:
+    prompt = build_er1_v2_planner_only_prompt(
+        _view(), TriggerLikelihoodModel().conditioned_beliefs()
+    )
+    assert "Authoritative current probabilities" in prompt
+    assert "configured diagnosis threshold" not in prompt
+    assert BINARY_ER1_V2_PROMPT_VERSION in prompt
+
+
+def test_threshold_aware_policy_receives_view_and_threshold_but_no_posterior() -> None:
+    client = CapturingClient([_diagnose("NO_STRUCTURAL_CHANGE", autonomous=True)])
+    policy = ER1V2ThresholdAwareAutonomousLLMPolicy(
+        client,
+        LLMConfig(max_retries=0, max_decision_calls=1),
+        0.95,
+    )
+
+    result = policy.decide(_view())
+
+    assert result.succeeded
+    assert policy.diagnosis_threshold == 0.95
+    assert "diagnosis threshold of 0.95" in client.requests[0].prompt
+    assert "Authoritative current probabilities" not in client.requests[0].prompt
+    assert "NO_STRUCTURAL_CHANGE: 0.127660" not in client.requests[0].prompt
+
+
+def test_threshold_value_and_prompt_version_propagate_through_runner() -> None:
+    client = CapturingClient([_diagnose("NO_STRUCTURAL_CHANGE", autonomous=True)])
+    config = LLMConfig(max_retries=0, max_decision_calls=1)
+    policy = ER1V2ThresholdAwareAutonomousLLMPolicy(client, config, 0.93)
+    result = ER1V2LLMEpisodeRunner(
+        condition=LLMCondition.THRESHOLD_AWARE_AUTONOMOUS,
+        experiment_budget=8,
+        diagnosis_threshold=0.93,
+        episode_seed=0,
+    ).run(ER1V2BinaryMachine(), FailureMode.NO_STRUCTURAL_CHANGE, policy)
+
+    assert "diagnosis threshold of 0.93" in client.requests[0].prompt
+    assert result.evaluation_metadata.diagnosis_threshold == 0.93
+    assert (
+        result.run_metadata.prompt_version
+        == BINARY_ER1_V2_THRESHOLD_AWARE_PROMPT_VERSION
+    )
+
+
+def test_threshold_aware_runner_rejects_threshold_mismatch() -> None:
+    policy = ER1V2ThresholdAwareAutonomousLLMPolicy(
+        CapturingClient([]),
+        LLMConfig(max_retries=0),
+        0.90,
+    )
+    with pytest.raises(ValueError, match="thresholds must match"):
+        ER1V2LLMEpisodeRunner(
+            condition=LLMCondition.THRESHOLD_AWARE_AUTONOMOUS,
+            diagnosis_threshold=0.95,
+        ).run(ER1V2BinaryMachine(), FailureMode.NO_STRUCTURAL_CHANGE, policy)
 
 
 @pytest.mark.parametrize("condition", (LLMCondition.FULL_AUTONOMOUS, LLMCondition.PLANNER_ONLY))

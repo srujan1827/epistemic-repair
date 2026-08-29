@@ -12,6 +12,9 @@ from epistemic_repair.er1_v2.views import ER1V2BenchmarkAgentView
 
 
 BINARY_ER1_V2_PROMPT_VERSION = "binary_er1_v2_001"
+BINARY_ER1_V2_THRESHOLD_AWARE_PROMPT_VERSION = (
+    "binary_er1_v2_threshold_aware_001"
+)
 
 
 _TASK_DESCRIPTION = """You are investigating a stochastic binary machine. Historically, input X usually produced physical output Y=X, and the ordinary primary sensor usually reported Y correctly.
@@ -31,14 +34,46 @@ Available diagnostic actions have these meanings:
 
 Use experiments to identify what persists. You have no tools, code execution, web access, files, or direct machine access. Return only the schema-constrained decision and a concise 1-3 sentence reason_summary; do not provide private chain-of-thought."""
 
+_FULL_AUTONOMOUS_INSTRUCTIONS = (
+    "Maintain normalized probabilities over all four explanations. Choose "
+    "RUN_EXPERIMENT when more persistent evidence is needed, or DIAGNOSE when "
+    "evidence is sufficient. Include all four current beliefs on every turn. "
+    "A diagnosis requires confidence."
+)
+
 
 def build_er1_v2_full_autonomous_prompt(view: ER1V2BenchmarkAgentView) -> str:
     """Build the qualitative full-autonomous V2 prompt."""
     _validate_view(view)
     return _assemble(
         view,
-        "Maintain normalized probabilities over all four explanations. Choose RUN_EXPERIMENT when more persistent evidence is needed, or DIAGNOSE when evidence is sufficient. Include all four current beliefs on every turn. A diagnosis requires confidence.",
+        _FULL_AUTONOMOUS_INSTRUCTIONS,
         belief_block=None,
+    )
+
+
+def build_er1_v2_threshold_aware_autonomous_prompt(
+    view: ER1V2BenchmarkAgentView,
+    diagnosis_threshold: float,
+) -> str:
+    """Build an autonomous prompt that reveals only the stopping threshold."""
+    _validate_view(view)
+    if (
+        not isinstance(diagnosis_threshold, (int, float))
+        or isinstance(diagnosis_threshold, bool)
+        or not 0.0 < diagnosis_threshold <= 1.0
+    ):
+        raise ValueError("diagnosis_threshold must be in (0, 1]")
+    threshold = f"{float(diagnosis_threshold):.6g}"
+    return _assemble(
+        view,
+        _FULL_AUTONOMOUS_INSTRUCTIONS
+        + " Do not issue a final diagnosis until your confidence in one "
+        "hypothesis is at least the configured diagnosis threshold of "
+        f"{threshold}. If the experiment budget is exhausted before reaching "
+        "that confidence, make your best-supported diagnosis.",
+        belief_block=None,
+        prompt_version=BINARY_ER1_V2_THRESHOLD_AWARE_PROMPT_VERSION,
     )
 
 
@@ -66,9 +101,10 @@ def _assemble(
     instructions: str,
     *,
     belief_block: str | None,
+    prompt_version: str = BINARY_ER1_V2_PROMPT_VERSION,
 ) -> str:
     sections = [
-        f"Prompt version: {BINARY_ER1_V2_PROMPT_VERSION}",
+        f"Prompt version: {prompt_version}",
         _TASK_DESCRIPTION,
         instructions,
         _format_view(view),

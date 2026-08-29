@@ -14,6 +14,7 @@ from epistemic_repair.er1_v2.likelihoods import ER1V2LikelihoodModel
 from epistemic_repair.er1_v2.llm_policy import (
     ER1V2FullAutonomousLLMPolicy,
     ER1V2PlannerOnlyLLMPolicy,
+    ER1V2ThresholdAwareAutonomousLLMPolicy,
 )
 from epistemic_repair.er1_v2.trigger_model import TriggerLikelihoodModel
 from epistemic_repair.er1_v2.views import ER1V2BenchmarkAgentView
@@ -29,7 +30,6 @@ from epistemic_repair.llm.schemas import (
 )
 from epistemic_repair.policies.llm import LLMPolicyResult
 from epistemic_repair.policies.stochastic_views import StochasticAgentExperimentRecord
-from epistemic_repair.prompts.binary_er1_v2 import BINARY_ER1_V2_PROMPT_VERSION
 
 
 ER1_V2_BENCHMARK_VERSION = "binary_er1_v2"
@@ -133,7 +133,11 @@ def evaluate_er1_v2_diagnosis(
     )
 
 
-ER1V2LLMPolicy = ER1V2FullAutonomousLLMPolicy | ER1V2PlannerOnlyLLMPolicy
+ER1V2LLMPolicy = (
+    ER1V2FullAutonomousLLMPolicy
+    | ER1V2PlannerOnlyLLMPolicy
+    | ER1V2ThresholdAwareAutonomousLLMPolicy
+)
 
 
 class ER1V2LLMEpisodeRunner:
@@ -252,7 +256,7 @@ class ER1V2LLMEpisodeRunner:
             thinking_level=config.thinking_level,
             max_output_tokens=config.max_output_tokens,
             request_timeout_seconds=config.request_timeout_seconds,
-            prompt_version=BINARY_ER1_V2_PROMPT_VERSION,
+            prompt_version=policy.prompt_version,
             timestamp_utc=now,
             benchmark_version=ER1_V2_BENCHMARK_VERSION,
             condition=self._condition,
@@ -291,7 +295,13 @@ class ER1V2LLMEpisodeRunner:
         )
 
     def _request(self, policy, view, beliefs):
-        if isinstance(policy, ER1V2FullAutonomousLLMPolicy):
+        if isinstance(
+            policy,
+            (
+                ER1V2FullAutonomousLLMPolicy,
+                ER1V2ThresholdAwareAutonomousLLMPolicy,
+            ),
+        ):
             return policy.decide(view)
         return policy.decide(view, beliefs)
 
@@ -306,6 +316,16 @@ class ER1V2LLMEpisodeRunner:
             raise TypeError("FULL_AUTONOMOUS requires ER1V2FullAutonomousLLMPolicy")
         if self._condition is LLMCondition.PLANNER_ONLY and not isinstance(policy, ER1V2PlannerOnlyLLMPolicy):
             raise TypeError("PLANNER_ONLY requires ER1V2PlannerOnlyLLMPolicy")
+        if self._condition is LLMCondition.THRESHOLD_AWARE_AUTONOMOUS:
+            if not isinstance(policy, ER1V2ThresholdAwareAutonomousLLMPolicy):
+                raise TypeError(
+                    "THRESHOLD_AWARE_AUTONOMOUS requires "
+                    "ER1V2ThresholdAwareAutonomousLLMPolicy"
+                )
+            if abs(policy.diagnosis_threshold - self._diagnosis_threshold) > 1e-12:
+                raise ValueError(
+                    "policy and runner diagnosis thresholds must match"
+                )
 
     @staticmethod
     def _belief_error(decision: ER1LLMDecision, beliefs: StochasticHypothesisBeliefs) -> float | None:

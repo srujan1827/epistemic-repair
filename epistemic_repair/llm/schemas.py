@@ -1,4 +1,4 @@
-"""Strict structured decisions for the two LLM experimental conditions."""
+"""Strict structured decisions for the LLM experimental conditions."""
 
 from dataclasses import dataclass
 from enum import Enum
@@ -17,6 +17,7 @@ class LLMCondition(str, Enum):
 
     FULL_AUTONOMOUS = "FULL_AUTONOMOUS"
     PLANNER_ONLY = "PLANNER_ONLY"
+    THRESHOLD_AWARE_AUTONOMOUS = "THRESHOLD_AWARE_AUTONOMOUS"
 
 
 class DecisionType(str, Enum):

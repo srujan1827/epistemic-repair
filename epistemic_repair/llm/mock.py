@@ -22,7 +22,11 @@ class DeterministicMockLLMClient(LLMClient):
 
     @staticmethod
     def _decide(prompt: str, *, planner_only: bool) -> dict[str, object]:
-        if "binary_er1_001" in prompt or "binary_er1_v2_001" in prompt:
+        if (
+            "binary_er1_001" in prompt
+            or "binary_er1_v2_001" in prompt
+            or "binary_er1_v2_threshold_aware_001" in prompt
+        ):
             return _decide_er1(prompt, planner_only)
         if "trusted Y=1" in prompt:
             return _diagnosis("SENSOR_CORRUPTION", planner_only)

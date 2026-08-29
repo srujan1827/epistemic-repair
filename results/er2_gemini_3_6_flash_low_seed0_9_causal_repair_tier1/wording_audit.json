@@ -1,0 +1,66 @@
+{
+  "all_episode_strings_are_canonical": true,
+  "canonical_diagnoses": {
+    "MISSING_LATENT_VARIABLE": {
+      "observed_variant_count": 1,
+      "sha256": "b68aba3a442007e41c92b8adbc71225457e3f89c211aef9a23cf1f03c1f892b1",
+      "text": "One global physical relationship is inadequate because behavior differs systematically with context; the observation mechanism remains healthy."
+    },
+    "NO_STRUCTURAL_CHANGE": {
+      "observed_variant_count": 1,
+      "sha256": "87ba1daf678af833b5fd65204147a7880c7a9138f095709a975a8006713a4860",
+      "text": "Persistent physical, observation-channel, and contextual mechanisms remain healthy; the triggering anomaly does not justify structural adaptation."
+    },
+    "SENSOR_CORRUPTION": {
+      "observed_variant_count": 1,
+      "sha256": "f0844bdf7ccf6d9e0c69eccf98f7c4bc56d92e7f5696617f7590d049c3421cb1",
+      "text": "The underlying physical relationship remains stable, while the primary observation channel persistently misreports it."
+    },
+    "WORLD_SHIFT": {
+      "observed_variant_count": 1,
+      "sha256": "6aecdcdeef13ce8f373db746ea0377832ef3b346784b15767e85e7c2e5100f33",
+      "text": "The observation mechanism remains healthy, while the underlying physical relationship has persistently changed."
+    }
+  },
+  "canonical_repairs": {
+    "ADD_LATENT_VARIABLE": {
+      "observed_variant_count": 1,
+      "sha256": "cdbee2a6bce1f3713a99447633d06f9c9c98c7100c7233bbc819011cd56fcb32",
+      "text": "Represent behavior as context-dependent rather than using one global relationship, while leaving sensor interpretation unchanged."
+    },
+    "NO_REPAIR": {
+      "observed_variant_count": 1,
+      "sha256": "717e27bcafed789e957242b6613510b1560a31917f864e1ae694102ffc8024a4",
+      "text": "Leave the current internal predictive state unchanged."
+    },
+    "RECALIBRATE_SENSOR": {
+      "observed_variant_count": 1,
+      "sha256": "7d327ea6774fbfc160e50838b719c86245fa057d0e4c809aaba57b135a6e1894",
+      "text": "Change how readings from the primary observation channel are interpreted, while leaving the physical relationship and contextual representation unchanged."
+    },
+    "UPDATE_WORLD_MODEL": {
+      "observed_variant_count": 1,
+      "sha256": "d92b95f1aa5192c891336ae2dbec50f5c941416f7ff785e4711816b1c429c722",
+      "text": "Change the assumed physical relationship between input and true output, while leaving observation-channel interpretation and contextual representation unchanged."
+    }
+  },
+  "episode_count": 40,
+  "hidden_diagnosis_labels_scanned": [
+    "NO_STRUCTURAL_CHANGE",
+    "WORLD_SHIFT",
+    "SENSOR_CORRUPTION",
+    "MISSING_LATENT_VARIABLE"
+  ],
+  "hidden_repair_labels_scanned": [
+    "NO_REPAIR",
+    "UPDATE_WORLD_MODEL",
+    "RECALIBRATE_SENSOR",
+    "ADD_LATENT_VARIABLE"
+  ],
+  "only_option_assignment_varies_across_seeds": true,
+  "prompt_label_leakage_free": true,
+  "prompt_label_leaks": [],
+  "prompt_version": "binary_er2_repair_selection_001",
+  "same_input_prompt_is_deterministic": true,
+  "scanned_prompt_count": 40
+}

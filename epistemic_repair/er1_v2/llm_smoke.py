@@ -7,6 +7,7 @@ from epistemic_repair.er1_v2.environment import ER1V2BinaryMachine
 from epistemic_repair.er1_v2.llm_policy import (
     ER1V2FullAutonomousLLMPolicy,
     ER1V2PlannerOnlyLLMPolicy,
+    ER1V2ThresholdAwareAutonomousLLMPolicy,
 )
 from epistemic_repair.er1_v2.llm_metrics import (
     ER1V2LLMConditionSummary,
@@ -49,11 +50,18 @@ def run_er1_v2_llm_smoke(
     output = []
     episode_index = 0
     for condition in conditions:
-        policy = (
-            ER1V2FullAutonomousLLMPolicy(client, config)
-            if condition is LLMCondition.FULL_AUTONOMOUS
-            else ER1V2PlannerOnlyLLMPolicy(client, config)
-        )
+        if condition is LLMCondition.FULL_AUTONOMOUS:
+            policy = ER1V2FullAutonomousLLMPolicy(client, config)
+        elif condition is LLMCondition.PLANNER_ONLY:
+            policy = ER1V2PlannerOnlyLLMPolicy(client, config)
+        elif condition is LLMCondition.THRESHOLD_AWARE_AUTONOMOUS:
+            policy = ER1V2ThresholdAwareAutonomousLLMPolicy(
+                client,
+                config,
+                diagnosis_threshold,
+            )
+        else:
+            raise ValueError(f"unsupported ER-1 V2 LLM condition: {condition}")
         episodes = []
         for hypothesis in failure_modes:
             if hypothesis not in ER1_HYPOTHESES:
