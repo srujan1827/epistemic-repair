@@ -4,19 +4,37 @@
 
 The central question is whether an agent can diagnose what went wrong, actively gather evidence, and apply the smallest appropriate repair without damaging knowledge that was already correct.
 
+## The toy world
+
+The benchmark uses a controlled binary system where `X` is the input, `Y` is the true physical outcome, `O` is the observation reported by the primary sensor, and `context` is an environmental condition such as A or B.
+
+```text
+X ---> Y ---> O
+     world   sensor
+```
+
+Under normal behavior, the physical relation is approximately `Y = X`, the primary sensor usually reports `O = Y`, and context does not normally change the relation. Now suppose the system sees `X = 1` but `O = 0`. That observation alone does **not** reveal what failed: the world may have changed, the sensor may be corrupted, context may matter even though the model ignores it, or the event may have been transient with no persistent change.
+
+| Failure mechanism | What changed in the toy world? | Correct repair |
+| --- | --- | --- |
+| `NO_STRUCTURAL_CHANGE` | The triggering anomaly was transient; the underlying world, sensor, and contextual structure remain healthy | `NO_REPAIR` |
+| `WORLD_SHIFT` | The physical relationship changes from approximately `Y = X` to `Y = 1 - X` | `UPDATE_WORLD_MODEL` |
+| `SENSOR_CORRUPTION` | The physical relationship remains healthy, but the primary sensor tends to report the opposite outcome | `RECALIBRATE_SENSOR` |
+| `MISSING_LATENT_VARIABLE` | The physical relationship depends on context, so one global `X -> Y` rule is insufficient | `ADD_LATENT_VARIABLE` |
+
+The same initial mismatch can therefore come from different underlying mechanisms, so the agent should investigate before deciding what to change. It can repeat the trial, use a trusted sensor, or change context.
+
 ## Benchmark stages
 
 ### ER-0: deterministic diagnosis
 
-ER-0 establishes the basic binary-machine environment. Different hidden failures can produce the same initial anomaly, so the agent cannot identify the cause from a single observation. Diagnostic interventions make the cases distinguishable.
-
-The basic loop is:
+ER-0 uses this toy world to test whether different hidden failure mechanisms can actually be distinguished through interventions. It validates deterministic causal distinctions, information boundaries, and the basic diagnostic loop:
 
 ```text
 Detect -> Hypothesize -> Experiment -> Diagnose
 ```
 
-ER-0 includes a Bayesian likelihood model, an information-gain oracle, and a random diagnostic baseline. It is deterministic and intended to validate the benchmark's causal and information boundaries.
+ER-0 includes a Bayesian likelihood model, an information-gain oracle, and a random diagnostic baseline.
 
 ### ER-1: active investigation under uncertainty
 
@@ -29,13 +47,13 @@ ER-1 turns diagnosis into a stochastic active-investigation problem. ER-1 V2 eva
 
 The agent can repeat a trial, use a trusted but imperfect sensor, or change context. ER-1 V1 exposed a benchmark-design problem: the initial anomaly and persistent dynamics were not cleanly separated. V2 fixes this by treating the trigger as a transient event and using subsequent experiments to measure persistent behavior.
 
-The primary calibrated operating point is an experiment budget of 8 and a diagnosis threshold of 0.95. Across 4,000 oracle episodes at that point, MAP diagnosis accuracy was **95.8%** and threshold-qualified success was **92.8%** ([calibration results](results/er1_v2_oracle_overall.csv)).
+Before LLM evaluation, the benchmark was validated through Bayesian oracle simulation. The full oracle calibration sweep contained **60,000 simulated episodes**. Its primary operating-point cell—an experiment budget of 8 and a diagnosis threshold of 0.95—contained **4,000 simulated episodes** and achieved **95.8%** MAP diagnosis accuracy and **92.8%** threshold-qualified success. These are oracle-simulation results, not Gemini LLM or API runs ([calibration report](results/er1_v2_oracle_calibration.md), [overall results](results/er1_v2_oracle_overall.csv)).
 
 The Gemini 3.6 Flash study compared `FULL_AUTONOMOUS`, `PLANNER_ONLY`, and `THRESHOLD_AWARE_AUTONOMOUS` over ten seeds per hypothesis. Planner-only had lower action regret and higher oracle-action agreement than full autonomy, while explicit threshold information reduced—but did not eliminate—premature diagnosis. These descriptive results suggest that better belief information helps planning, while stopping and confidence calibration remain important weaknesses. The sample uses one model and one reasoning configuration; it is not a statistical significance claim ([full analysis](results/er1_v2_gemini_3_6_flash_low_seed0_9_final_analysis/report.md)).
 
 ### ER-2: repair execution and collateral damage
 
-ER-2 adds explicit repairs to independent components of the agent's predictive state:
+ER-2 remains in the same controlled toy world and asks: given a diagnosis, what internal component should the toy agent actually change? It adds explicit repairs to independent components of the agent's predictive state:
 
 | Diagnosed cause | Minimal repair |
 | --- | --- |
@@ -44,7 +62,7 @@ ER-2 adds explicit repairs to independent components of the agent's predictive s
 | `SENSOR_CORRUPTION` | `RECALIBRATE_SENSOR` |
 | `MISSING_LATENT_VARIABLE` | `ADD_LATENT_VARIABLE` |
 
-Repairs are evaluated on affected-region recovery, preservation of unaffected knowledge, overall post-repair accuracy, and collateral damage. The deterministic 4×4 repair matrix demonstrates the core risk: a wrong repair can improve behavior in the region that triggered adaptation while damaging previously correct knowledge. For example, changing the world model after sensor corruption partially improves affected behavior but reduces unaffected-region accuracy to zero ([repair matrix](results/er2_deterministic/repair_matrix.csv)).
+These are benchmark state mutations, not real-world model repair. They are evaluated on affected-region recovery, preservation of unaffected knowledge, overall post-repair accuracy, and collateral damage. The deterministic 4×4 repair matrix demonstrates the core risk: a wrong repair can improve behavior in the region that triggered adaptation while damaging previously correct knowledge. For example, changing the world model after sensor corruption partially improves affected behavior but reduces unaffected-region accuracy to zero ([repair matrix](results/er2_deterministic/repair_matrix.csv)).
 
 ## Main results
 
