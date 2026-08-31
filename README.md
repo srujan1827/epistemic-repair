@@ -1,574 +1,119 @@
 # Epistemic Repair
 
-This repository starts a research program around a simple question: can an AI
-agent determine **why** a prediction became wrong before deciding what to learn
-or repair?
+**Epistemic Repair** studies what an AI system should do when its predictions stop matching observations. A mismatch does not necessarily mean that the world model is wrong: the world may have changed, the observation channel may be corrupted, important context may be missing, or there may be no persistent structural change at all.
 
-Identical visible errors can have different epistemic causes. Updating the world
-model is appropriate after a real world shift, but harmful when the sensor is
-the faulty component. Likewise, an apparently broken rule may instead be an
-incomplete rule that omits a relevant latent variable.
+The central question is whether an agent can diagnose what went wrong, actively gather evidence, and apply the smallest appropriate repair without damaging knowledge that was already correct.
 
-## ER-0: deterministic epistemic diagnosis
+## Benchmark stages
 
-The binary machine accepts an agent-chosen bit `X`, computes a true physical
-output `Y`, and returns sensor observation `O`. `Y` and optional latent variable
-`Z` remain hidden from the ordinary agent observation.
+### ER-0: deterministic diagnosis
 
-V0 implements exactly four episode conditions:
+ER-0 establishes the basic binary-machine environment. Different hidden failures can produce the same initial anomaly, so the agent cannot identify the cause from a single observation. Diagnostic interventions make the cases distinguishable.
 
-| Condition | Physical rule | Sensor rule | Correct repair |
-| --- | --- | --- | --- |
-| `NORMAL` | `Y = X` | `O = Y` | `NO_REPAIR` |
-| `WORLD_SHIFT` | `Y = 1 - X` | `O = Y` | `UPDATE_WORLD_MODEL` |
-| `SENSOR_CORRUPTION` | `Y = X` | `O = 1 - Y` | `RECALIBRATE_SENSOR` |
-| `MISSING_LATENT_VARIABLE` | `Y = X` if `Z=0`, otherwise `Y = 1-X` | `O = Y` | `ADD_LATENT_VARIABLE` |
-
-For the latent-variable condition, `Z=0` reproduces the pre-anomaly behavior
-and `Z=1` produces the anomaly. A missing-latent episode defaults to `Z=1`, but
-either value can be selected explicitly at reset for controlled experiments.
-
-All three failure conditions deliberately produce the same initial visible
-anomaly for `X=1`:
+The basic loop is:
 
 ```text
-X=1 -> O=0
+Detect -> Hypothesize -> Experiment -> Diagnose
 ```
 
-That observation alone cannot identify its cause. The simulator retains `Y`,
-`Z`, the failure mode, and the correct repair behind the separate
-`get_ground_truth()` evaluation interface. Agent code should receive only the
-`Observation(x, o)` returned by `step()`.
-
-ER-0 remains a standalone deterministic benchmark. Its environment,
-likelihoods, three-hypothesis belief state, trusted-sensor semantics, prompts,
-and evaluation behavior are unchanged by ER-1.
-
-## ER-1 V1: single-process stochastic diagnosis
-
-ER-1 asks a harder question: did anything structurally fail at all? In a noisy
-world, adaptation can itself be harmful. An investigator must distinguish
-evidence of a structural failure from ordinary variation—most importantly, it
-must learn **when not to repair**.
-
-ER-1 is implemented by separate stochastic environment, likelihood, belief,
-policy-view, runner, and prompt modules. It adds the genuine competing
-hypothesis `NO_STRUCTURAL_CHANGE`, whose correct repair label is `NO_REPAIR`.
-The other repair mappings are unchanged.
-
-The centralized default generative parameters are:
-
-| Component | ER-1 probability |
-| --- | ---: |
-| Preferred physical relation | `0.90` |
-| Reliable primary sensor reports `O=Y` | `0.95` |
-| Corrupted primary sensor reports `O=1-Y` | `0.90` |
-| Trusted sensor reports `T=Y` | `0.99` |
-| Normative diagnosis threshold | `0.90` |
-
-`NO_STRUCTURAL_CHANGE` and `SENSOR_CORRUPTION` retain a physical process that
-prefers `Y=X`; `WORLD_SHIFT` prefers `Y=1-X`. `MISSING_LATENT_VARIABLE`
-prefers `Y=X` in context A and `Y=1-X` in context B. The reliable primary
-sensor applies to every hypothesis except sensor corruption, and all ordinary
-binary outcomes have non-zero probability.
-
-Every investigator is deliberately shown the same selected entry event,
-`X=1, O=0`, in context B. The environment constructs that visible event
-directly rather than rejection-sampling it. The normative initial belief state
-explicitly accounts for the selection:
-
-```text
-P(H | X=1,O=0) ∝ P(O=0 | X=1,H,context=B) P(H)
-```
-
-With equal `0.25` base priors, the anomaly likelihoods and conditioned beliefs
-are:
-
-| Hypothesis | `P(O=0 | X=1,H,B)` | Conditioned belief |
-| --- | ---: | ---: |
-| `NO_STRUCTURAL_CHANGE` | `0.14` | `0.052239` |
-| `WORLD_SHIFT` | `0.86` | `0.320896` |
-| `SENSOR_CORRUPTION` | `0.82` | `0.305970` |
-| `MISSING_LATENT_VARIABLE` | `0.86` | `0.320896` |
-
-The hidden initial `Y` is sampled from its appropriate conditional
-distribution given the selected observation. It is never agent-visible.
-Episodes use a private random generator reinitialized from the recorded episode
-seed, so the same seed and action sequence reproduce the same trajectory
-without depending on global random state.
-
-ER-1 changes the trusted action deliberately: `USE_TRUSTED_SENSOR` performs a
-new physical trial and returns noisy trusted observation `T`, not hidden `Y`.
-The `0.99` reliability makes it highly informative without allowing one
-measurement to collapse the posterior mathematically. ER-0 continues to return
-its existing perfect trusted measurement of `Y`.
-
-## ER-1 V2: transient trigger, persistent investigation
-
-ER-1 V1 remains the historical baseline: its selected trigger anomaly and its
-later investigation evidence are explained by one stochastic process. V2 is
-additive and separates those roles explicitly:
-
-1. A one-time **transient trigger anomaly** model explains why the episode
-   entered investigation after `X=1, O=0`.
-2. A separate **persistent investigation dynamics** model generates every
-   later `REPEAT_TRIAL`, `USE_TRUSTED_SENSOR`, and `CHANGE_CONTEXT` result.
-
-This separation matters because making an anomaly plausible under
-`NO_STRUCTURAL_CHANGE` should not require making every later healthy-system
-observation noisier. With equal base priors, V2 conditions exactly once on the
-trigger likelihoods `0.30`, `0.70`, `0.65`, and `0.70`, producing:
-
-| Hypothesis | `P(H | A0)` |
-| --- | ---: |
-| `NO_STRUCTURAL_CHANGE` | `0.1276595745` |
-| `WORLD_SHIFT` | `0.2978723404` |
-| `SENSOR_CORRUPTION` | `0.2765957447` |
-| `MISSING_LATENT_VARIABLE` | `0.2978723404` |
-
-The trigger is constructed directly, consumes no random draw, and has no
-hidden trigger `Y`. Every diagnostic experiment is then a fresh trial from the
-persistent process. The V2 oracle starts from the trigger-conditioned belief
-state, uses only persistent likelihoods for Bayesian updates and expected
-information gain, and never receives hidden ground truth.
-
-The V2 LLM prompt is versioned as `binary_er1_v2_001`. It explains the
-transient-versus-persistent distinction qualitatively but exposes no trigger
-probabilities, investigation parameters, likelihood tables, information-gain
-values, repairs, or hidden state. Planner-only receives the current normative
-posterior; full-autonomous does not. V1 retains `binary_er1_001` unchanged.
-
-## ER-2 V0: minimal deterministic repair evaluation
-
-ER-2 isolates the question that follows diagnosis: can an agent choose and
-apply the smallest appropriate repair without damaging knowledge that remains
-correct? It reuses the four ER-1 V2 hypotheses and the existing typed repair
-operators. Diagnosis is supplied externally in this first version; ER-1 and
-ER-2 are not coupled yet.
-
-The repairable agent state has three independent components:
-
-| Component | Healthy initial state | Targeted repair |
-| --- | --- | --- |
-| Persistent world relationship | `Y=X` | `UPDATE_WORLD_MODEL` sets `Y=1-X` |
-| Primary-sensor calibration | `O=Y` | `RECALIBRATE_SENSOR` sets `O=1-Y` |
-| Context/latent representation | absent | `ADD_LATENT_VARIABLE` adds identity in A and inversion in B |
-
-`NO_REPAIR` is exact identity. Every operator mutates only its named component.
-The fixed held-out suite contains ten deterministic cases: four physical
-`X,context→Y` predictions, two direct sensor `Y→O` predictions, and four
-end-to-end `X,context→O` predictions. This separation exposes compensating
-wrong repairs. For example, changing the world model after sensor corruption
-can match corrupted end-to-end observations while making every physical
-prediction wrong.
-
-Affected cases are those changed by the true structural hypothesis. For
-`NO_STRUCTURAL_CHANGE`, which has no persistently changed region, two
-trigger-adjacent held-out probes are designated as the affected preservation
-check. Collateral damage is the signed quantity:
-
-```text
-pre-repair accuracy on unaffected cases
-- post-repair accuracy on unaffected cases
-```
-
-It is not clamped: positive values mean damage, zero means preservation, and
-negative values would mean improvement. The deterministic 4×4 repair matrix,
-five baselines, and technical report can be regenerated without any provider:
-
-```bash
-python -m scripts.demo_er2_repairs --overwrite
-python -m scripts.run_er2_llm_repair_selection --preflight-only --output-dir results/er2_llm_repair_selection_preflight
-python -m scripts.run_er1_v2_er2_end_to_end --preflight-only --output-dir results/er1_v2_er2_end_to_end_preflight
-```
-
-### ER-2 causal repair selection
-
-The small ER-2 LLM study treats the model only as a repair selector. It receives
-an externally supplied diagnosis, one frozen causal description, and four
-seed-permuted options labelled `A` through `D`. Each option describes a state
-mutation by its consequences; canonical repair enum names and the hidden
-option-to-repair mapping are absent from the prompt. Trusted Python translates
-the selected letter and invokes the existing deterministic ER-2 mutation and
-held-out evaluator.
-
-All four diagnosis descriptions and all four option descriptions are fixed
-versioned strings. `wording_audit.json` records the text, SHA-256 hashes, and
-40-cell exact-use checks; `permutation_audit.csv` verifies the seed-controlled
-mapping. Malformed structured output, provider failures, and rate limits are
-reported separately from valid wrong causal repairs.
-
-The live study is deliberately not run automatically. The runner checkpoints
-each cell and generates `episodes.csv`, `summary.csv`, `per_hypothesis.csv`,
-`wrong_repair_analysis.csv`, `permutation_audit.csv`, `wording_audit.json`,
-`traces.jsonl`, and `report.md`. The single frozen condition is
-`CAUSAL_REPAIR_SELECTION`; there are no prompt variants.
-
-### ER-1 V2 to ER-2 end-to-end evaluation
-
-The prospective end-to-end condition connects the unchanged ER-1 V2
-`FULL_AUTONOMOUS` investigation to the unchanged deterministic ER-2 repair
-mutation/evaluator. After the model diagnoses, a separate provider request sees
-only the final ER-1 benchmark-agent evidence record and the same frozen neutral
-repair descriptions used by the supplied-diagnosis control. It receives no
-benchmark-supplied diagnosis, causal interpretation, truth, normative posterior,
-oracle action, or held-out targets.
-
-The study keeps diagnosis, repair choice, behavioral recovery, and collateral
-damage separate. It additionally evaluates all four repairs counterfactually
-after each completed investigation without model calls. The resulting report
-does not pool the prospective study with the existing 40/40 supplied-diagnosis
-control.
-
-## ER-0 active diagnostic experiments
-
-The environment implements four typed diagnostic actions:
-
-| Action | Required arguments | Agent-visible result |
-| --- | --- | --- |
-| `REPEAT_TRIAL` | `x` | repeated primary-sensor `X` and `O` |
-| `USE_TRUSTED_SENSOR` | `x` | trusted independent measurement of `Y` |
-| `CHANGE_CONTEXT` | `x`, target `Context` | target context plus primary-sensor `X` and `O` |
-| `INSPECT_LATENT_VARIABLE` | none | whether `Z` exists and its value when available |
-
-`INSPECT_LATENT_VARIABLE` is retained strictly for debugging and internal
-evaluation. It is intentionally excluded from `BENCHMARK_ACTIONS` because its
-availability flag would reveal the missing-latent condition directly. Policies
-can choose exactly these three agent-visible benchmark actions:
-
-```text
-REPEAT_TRIAL
-USE_TRUSTED_SENSOR
-CHANGE_CONTEXT
-```
-
-Contexts use an explicit deterministic mechanism: `Context.A` maps to `Z=0`
-and `Context.B` maps to `Z=1` only in the missing-latent condition. In the world
-shift and sensor-corruption conditions, changing context has no physical effect
-and no causally meaningful `Z` is created.
-
-The trusted sensor separates sensor corruption (`Y=1` for `X=1`) from the other
-two failures (`Y=0`). A subsequent context change separates a global world shift
-from missing latent dependence: the shifted world stays at `O=0`, while the
-latent world changes between `O=1` in context A and `O=0` in context B.
-
-No action result contains a hidden failure label or repair label.
-
-## Architecture and information boundaries
-
-- **Environment:** the hidden ground-truth generator. It owns physical `Y`,
-  optional internal `Z`, failure mode, and correct repair metadata.
-- **Diagnostics:** legitimate interventions and measurements. Their typed
-  results expose only evidence produced by the selected action.
-- **Beliefs and likelihoods:** normative Bayesian machinery used to define the
-  reference investigator and score experiment informativeness.
-- **Oracle:** a privileged reference policy. `OraclePolicyView` grants it the
-  current belief state, normative likelihood model, observable context, and
-  benchmark action set.
-- **Benchmark agent:** a restricted policy. `BenchmarkAgentView` contains only
-  initial observable history, safe experiment history, current context,
-  benchmark actions, and steps remaining.
-- **Evaluation:** runs the interaction and attaches ground truth only after
-  policy decisions, outside the agent boundary.
-
-The normative `DeterministicLikelihoodModel` is **not available to future LLM
-agents**. It is oracle-privileged benchmark machinery. Restricted policies also
-cannot access `get_ground_truth()`, hidden `Y` except through a trusted-sensor
-result, internal `Z`, failure labels, repair labels, or evaluation traces.
-
-## LLM investigator smoke layer
-
-The LLM is treated as an **investigator policy**, never as the environment. It
-receives a typed `BenchmarkAgentView`, returns one schema-constrained decision,
-and cannot invoke diagnostics itself. Trusted Python validates the response and
-executes the selected safe action. No model tools, browsing, file access, code
-execution, or direct `BinaryMachine` reference are provided.
-
-Two experimental conditions remain separate in code, traces, and summaries:
-
-- `FULL_AUTONOMOUS`: receives only the task description, observable history,
-  context, safe actions, and remaining experiment budget. It states and updates
-  its own beliefs, selects experiments, chooses when to stop, and diagnoses.
-- `PLANNER_ONLY`: receives the same safe view plus current normalized Bayesian
-  hypothesis probabilities. The probabilities are authoritative; the model is
-  evaluated only as an experiment planner and stopping/diagnosis selector.
-
-Planner-only prompts contain no likelihood tables, expected information gains,
-oracle action, or evaluation truth. Autonomous prompts contain no normative
-posterior at all. The benchmark may compare stated autonomous beliefs with the
-normative posterior after the fact, but never feeds that comparison back.
-
-ER-0 prompts remain versioned as `binary_v0_001`; ER-1 uses the separate
-`binary_er1_001` methodology. The ER-1 prompt describes process and sensor
-noise qualitatively, includes all four hypotheses, and warns against premature
-diagnosis. It does not reveal the `0.90`/`0.95`/`0.99` likelihood parameters.
-Planner-only may receive the current four-way posterior, but never a likelihood
-table or oracle recommendation. Prompts request only a short
-`reason_summary`; private chain-of-thought and provider thinking tokens are not
-collected. Structured responses may request one of the three benchmark actions
-or issue a diagnosis valid for the selected benchmark. Malformed JSON, invalid probabilities,
-unsupported actions, contradictory fields, timeouts, rate limits, and provider
-errors are recorded explicitly rather than guessed around.
-
-Provider schemas require a stable structural envelope with nullable
-branch-specific fields. The strict Python parser remains responsible for
-decision-dependent semantics, such as requiring an action only for
-`RUN_EXPERIMENT` and a diagnosis (plus autonomous confidence) for `DIAGNOSE`.
-
-### Provider architecture
-
-Benchmark code depends only on `LLMClient.generate(LLMRequest)`. The sole real
-adapter currently implemented is `GeminiLLMClient`; no automatic router or
-fallback model exists. Provider, model ID, thinking level, output-token bound,
-timeout, retries, and decision-call budget are configurable. Gemini-specific
-SDK calls stay under `epistemic_repair/llm/gemini.py`.
-
-The default is `gemini-3.7-flash` with `medium` thinking. The adapter uses
-structured JSON output, supplies no tools, requests no thought summaries, and
-does not send deprecated sampling settings. See the official
-[Gemini 3.7 Flash documentation](https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash)
-and [structured-output guide](https://ai.google.dev/gemini-api/docs/structured-output).
-
-Structured LLM responses default to `1024` maximum output tokens. Live Gemini
-smoke testing showed that `256` could truncate the autonomous response
-envelope; the limit remains configurable with `--max-output-tokens`.
-
-Automatic free-model routing is unsuitable for these experiments because a
-different underlying model between requests would invalidate attribution and
-reproducibility. Free-tier availability and rate limits can change; failures
-are surfaced without silently switching provider or model.
-
-### Credentials and local development
-
-Install the optional official SDK and set the key in the shell:
-
-```bash
-python -m pip install -e ".[dev,gemini]"
-$env:GEMINI_API_KEY = "your-local-key"  # PowerShell
-```
-
-Alternatively, copy `.env.example` to a local `.env` and fill it locally.
-`.env` and `.env.*` are gitignored, existing shell variables take precedence,
-and keys are never printed or recorded. Missing `GEMINI_API_KEY` causes a clear
-configuration error. Never commit the local `.env` file.
-
-### Small smoke runs
-
-The no-network deterministic smoke demonstration is:
-
-```bash
-python -m scripts.demo_llm_agent --mock --condition both --budget 2 --repetitions 1
-```
-
-A deliberately tiny live call set can be started explicitly after configuring
-the key:
-
-```bash
-python -m scripts.demo_llm_agent --provider gemini --model gemini-3.7-flash --condition full --budget 2 --repetitions 1
-```
-
-The default repetition count is three. This is only an integration smoke stage,
-not a sample size suitable for scientific claims. No live API call is made by
-the unit tests.
-
-Select benchmark history explicitly with `--benchmark er0`,
-`--benchmark er1_v1`, or `--benchmark er1_v2`. The older `--benchmark er1`
-spelling remains an alias for V1 and is never silently redirected to V2. A
-no-network V2 interface smoke run is:
-
-```bash
-python -m scripts.demo_llm_agent --mock --benchmark er1_v2 --condition both --budget 2 --repetitions 1
-```
-
-## Beliefs and deterministic likelihoods
-
-`HypothesisBeliefs` is an immutable normalized distribution over exactly three
-hypotheses: world shift, sensor corruption, and missing latent variable. It
-supports probability lookup, entropy in bits, canonical tie-breaking, and
-construction from normalized weights. The V0 prior is uniform, with entropy
-`log2(3) ≈ 1.584963` bits.
-
-`DeterministicLikelihoodModel` is the single normative outcome model used for
-Bayesian updates and experiment selection. It predicts each action's observable
-outcome under every hypothesis and current context. Updates use
-`P(H | r, E) ∝ P(r | H, E)P(H)`; impossible observations raise
-`ImpossibleObservationError` rather than producing invalid beliefs.
-
-At the uniform prior in context B, the expected information gains are:
-
-| Action | Expected information gain |
-| --- | ---: |
-| `REPEAT_TRIAL` | `0` bits |
-| `USE_TRUSTED_SENSOR` | `0.918296` bits |
-| `CHANGE_CONTEXT` | `0.918296` bits |
-
-The change action deterministically switches to the other known context. Thus
-the initial transition is B to A, matching the benchmark likelihood table; a
-later change switches A back to B.
-
-## ER-1 likelihoods, policies, and metrics
-
-`StochasticLikelihoodModel` analytically computes every binary outcome
-distribution, soft Bayesian update, and expected information gain. It does not
-use realized entropy reduction to select actions. At the anomaly-conditioned
-initial posterior in context B, the default expected information gains are:
-
-| Action | Expected information gain |
-| --- | ---: |
-| `REPEAT_TRIAL` | `0.087597` bits |
-| `USE_TRUSTED_SENSOR` | `0.470190` bits |
-| `CHANGE_CONTEXT` | `0.368306` bits |
-
-Unlike ER-0, repeating a primary-sensor trial is informative. The stochastic
-oracle chooses maximum expected information gain with deterministic action-order
-tie-breaking and stops when posterior confidence reaches the configurable
-threshold or its budget is exhausted. It receives beliefs and the normative
-likelihood model, but never hidden ground truth. The restricted random baseline
-uses its own seed and receives only the safe ER-1 agent view.
-
-ER-1 supports budgets `1`, `2`, `3`, `5`, and `8` by default. Alongside
-accuracy, success, experiment count, action regret, and oracle-action agreement,
-its summaries report:
-
-- `false_structural_diagnosis_rate`: a structural diagnosis when truth is
-  `NO_STRUCTURAL_CHANGE`;
-- `missed_structural_failure_rate`: `NO_STRUCTURAL_CHANGE` diagnosed for a
-  structural truth; and
-- `premature_diagnosis_rate` for LLM episodes: diagnosis before the normative
-  posterior reaches the configured threshold.
-
-### ER-1 oracle calibration
-
-The no-network calibration script measures the stochastic oracle over budgets,
-confidence thresholds, hypotheses, and reproducible episode seeds. Its default
-grid is 60,000 episodes: four hypotheses × five budgets × three thresholds ×
-1,000 seeds.
-
-```bash
-python -m scripts.calibrate_er1_oracle
-```
-
-Use `--seeds`, `--budgets`, `--thresholds`, and `--output-dir` to run smaller
-validation grids. The script reports MAP accuracy separately from reaching the
-configured threshold on the correct hypothesis and writes aggregate CSV,
-confusion-matrix JSON, representative hard-case JSON, and a Markdown report.
-The calibration implementation contains no LLM/provider calls and makes no
-network requests.
-
-An experiment-only staged parameter search can evaluate possible ER-1 V2
-generative constants without modifying the active V1 configuration:
-
-```bash
-python -m scripts.search_er1_parameters
-```
-
-It first screens ordinary no-change noise, then modest structural contrasts,
-and finally runs the full calibration grid for the top three candidates plus
-V1 when needed. Candidate parameters, likelihoods, and environments remain
-isolated from `epistemic_repair/er1/config.py`.
-
-## Policies and evaluation
-
-`OracleInformationGainPolicy` chooses the action with maximum expected
-information gain. Ties follow `BENCHMARK_ACTIONS` order, so the initial tie is
-resolved in favor of `USE_TRUSTED_SENSOR`. `RandomDiagnosticPolicy` samples
-uniformly from the same action tuple and accepts a seed for reproducibility.
-
-The random baseline implements the restricted benchmark-policy interface and
-receives no beliefs or likelihood model. Only the oracle receives the
-privileged normative view. Both interfaces exclude the environment, hidden
-failure mode, repair label, and evaluation metadata.
-
-`DiagnosticEpisodeRunner` begins from `X=1 -> O=0`, updates beliefs after each
-typed result, and stops at a confidence threshold or experiment budget. The
-restricted agent receives only safe `AgentExperimentRecord` history. A separate
-evaluation trace records priors, expected information gains, actions, results,
-posteriors, realized information gain, and action regret. Ground truth is read
-only after policy interaction and attached to the outer evaluation result.
-
-Evaluation includes diagnosis accuracy, experiments used, success within
-budget, cumulative information gain, and cumulative action regret. No repair
-metrics or repair execution are present. `evaluate_policy_budgets()` supports
-reproducible sweeps over budgets such as 1, 2, 3, and 5 experiments.
-
-## Setup and usage
-
-Requires Python 3.10 or later. There are no runtime dependencies.
+ER-0 includes a Bayesian likelihood model, an information-gain oracle, and a random diagnostic baseline. It is deterministic and intended to validate the benchmark's causal and information boundaries.
+
+### ER-1: active investigation under uncertainty
+
+ER-1 turns diagnosis into a stochastic active-investigation problem. ER-1 V2 evaluates four hypotheses:
+
+- `NO_STRUCTURAL_CHANGE`: the triggering anomaly was transient;
+- `WORLD_SHIFT`: the physical input-output relationship changed;
+- `SENSOR_CORRUPTION`: the physical relationship remains stable, but the primary sensor misreports it; and
+- `MISSING_LATENT_VARIABLE`: behavior depends systematically on context.
+
+The agent can repeat a trial, use a trusted but imperfect sensor, or change context. ER-1 V1 exposed a benchmark-design problem: the initial anomaly and persistent dynamics were not cleanly separated. V2 fixes this by treating the trigger as a transient event and using subsequent experiments to measure persistent behavior.
+
+The primary calibrated operating point is an experiment budget of 8 and a diagnosis threshold of 0.95. Across 4,000 oracle episodes at that point, MAP diagnosis accuracy was **95.8%** and threshold-qualified success was **92.8%** ([calibration results](results/er1_v2_oracle_overall.csv)).
+
+The Gemini 3.6 Flash study compared `FULL_AUTONOMOUS`, `PLANNER_ONLY`, and `THRESHOLD_AWARE_AUTONOMOUS` over ten seeds per hypothesis. Planner-only had lower action regret and higher oracle-action agreement than full autonomy, while explicit threshold information reduced—but did not eliminate—premature diagnosis. These descriptive results suggest that better belief information helps planning, while stopping and confidence calibration remain important weaknesses. The sample uses one model and one reasoning configuration; it is not a statistical significance claim ([full analysis](results/er1_v2_gemini_3_6_flash_low_seed0_9_final_analysis/report.md)).
+
+### ER-2: repair execution and collateral damage
+
+ER-2 adds explicit repairs to independent components of the agent's predictive state:
+
+| Diagnosed cause | Minimal repair |
+| --- | --- |
+| `NO_STRUCTURAL_CHANGE` | `NO_REPAIR` |
+| `WORLD_SHIFT` | `UPDATE_WORLD_MODEL` |
+| `SENSOR_CORRUPTION` | `RECALIBRATE_SENSOR` |
+| `MISSING_LATENT_VARIABLE` | `ADD_LATENT_VARIABLE` |
+
+Repairs are evaluated on affected-region recovery, preservation of unaffected knowledge, overall post-repair accuracy, and collateral damage. The deterministic 4×4 repair matrix demonstrates the core risk: a wrong repair can improve behavior in the region that triggered adaptation while damaging previously correct knowledge. For example, changing the world model after sensor corruption partially improves affected behavior but reduces unaffected-region accuracy to zero ([repair matrix](results/er2_deterministic/repair_matrix.csv)).
+
+## Main results
+
+All LLM results below used **Gemini 3.6 Flash** with low thinking. They are small, matched-seed studies in a toy benchmark.
+
+| Study | Main result |
+| --- | --- |
+| ER-1 V2 oracle, budget 8 / threshold 0.95 | 95.8% MAP accuracy; 92.8% threshold success |
+| ER-1 V2 LLM diagnosis | Planner-only reduced mean action regret from 0.168 to 0.081; threshold awareness reduced valid-episode premature diagnosis from 92.5% to 78.4% |
+| ER-2 supplied causal diagnosis control | 40/40 correct repair selections |
+| ER-1 → ER-2 end-to-end | 40/40 completed; 75% diagnosis accuracy; 55% repair accuracy; 50% correct diagnosis and repair |
+
+### Supplied causal diagnosis control
+
+The model received a correct causal description and seed-randomized neutral repair options labelled A–D. It selected the correct repair in **40/40 episodes**, with no protocol or provider failures ([control summary](results/er2_gemini_3_6_flash_low_seed0_9_causal_repair_tier1/summary.csv)). This shows that repair selection is easy for Gemini 3.6 Flash in this toy setting when the causal failure is already known. It does **not** solve the broader Epistemic Repair problem.
+
+### End-to-end: no supplied diagnosis
+
+In the end-to-end condition, the model first investigated through ER-1 evidence and then selected a neutral ER-2 repair without receiving the ground-truth diagnosis or a benchmark-written causal interpretation. All **40/40 episodes completed** with no provider, rate-limit, or scientific-model failures. Diagnosis accuracy was **75%**, repair-selection accuracy was **55%**, and the joint correct-diagnosis/correct-repair rate was **50%**. Mean collateral damage was **0.245**, showing that wrong repair choices measurably damaged unaffected knowledge ([end-to-end summary](results/er1_v2_er2_end_to_end_gemini_3_6_flash_low_seed0_9_tier1/summary.csv)).
+
+The repair call is stateless: it reconstructs its choice from the agent-visible investigation record rather than carrying an internal belief state across provider calls. This limitation should be considered when interpreting diagnosis-repair consistency.
+
+> **Main takeaway:** When the cause is explicitly known, repair selection is easy in this toy setting. The harder problem is determining the cause from noisy evidence and deciding what deserves adaptation. Wrong causal attribution can produce locally plausible but globally damaging repairs.
+
+## Installation and use
+
+The project requires Python 3.10 or later. Core benchmark code has no runtime dependencies; development tests use `pytest`, and live Gemini runs use the optional `google-genai` dependency.
 
 ```bash
 python -m pip install -e ".[dev]"
-python -m pytest
-python -m scripts.demo_binary_world
-python -m scripts.demo_diagnostics
-python -m scripts.demo_policy_evaluation
-python -m scripts.demo_llm_agent --mock --condition both --budget 2 --repetitions 1
-python -m scripts.demo_er1_oracle --budget 5 --threshold 0.90 --seed 0
-python -m scripts.demo_llm_agent --mock --benchmark er1_v1 --condition both --budget 5 --repetitions 1
-python -m scripts.demo_llm_agent --mock --benchmark er1_v2 --condition both --budget 5 --repetitions 1
-python -m scripts.demo_er1_v2_sanity --seeds 100
+python -m pytest -q
+```
+
+Run the deterministic ER-2 matrix and report without network access:
+
+```bash
 python -m scripts.demo_er2_repairs --overwrite
 ```
 
-For ER-1 V2 LLM runs, `--diagnosis-threshold` controls the normative threshold
-used for premature-diagnosis evaluation and defaults to `0.90`. It is threaded
-only into the V2 runner, so ER-0 and ER-1 V1 retain their historical behavior.
-An episode budget of `B` can require up to `B+1` model decision calls when the
-model uses all `B` experiments and diagnoses on the following turn; configure
-`--max-decision-calls` independently when running that design.
-
-V2 LLM evaluation keeps four concepts separate: raw diagnosis correctness,
-correct diagnosis within the bounded episode, threshold-qualified success, and
-premature diagnosis. Threshold qualification and prematurity use the normative
-Bayesian probability of the model's chosen diagnosis at the diagnosis turn—not
-the model's stated confidence and not the maximum posterior of some other
-hypothesis. The historical `success_within_budget` field is preserved, with the
-clearer V2 alias `diagnosed_correctly_within_budget`.
-
-The full fixed-grid V2 oracle calibration is explicitly versioned and writes
-only `er1_v2_oracle_*` artifacts. It compares matching cells against the
-existing V1 CSV artifacts without modifying them:
+For live LLM experiments, install the Gemini extra and set `GEMINI_API_KEY` in the environment or a local gitignored `.env` file. Never commit the key.
 
 ```bash
-python -m scripts.calibrate_er1_v2_oracle
+python -m pip install -e ".[dev,gemini]"
 ```
 
-The default grid is 60,000 no-network oracle episodes: four hypotheses, five
-budgets, three thresholds, and 1,000 episode seeds. This command imports no LLM
-or provider adapter and never makes a network request.
+Supported experiment commands include:
 
-Minimal API example:
+```bash
+python -m scripts.run_er1_v2_llm_comparison --provider gemini --model gemini-3.6-flash --thinking-level low --conditions full planner threshold_aware --seeds 0..9 --budget 8 --diagnosis-threshold 0.95 --max-decision-calls 9 --output-dir results/er1_v2_llm_run
 
-```python
-from epistemic_repair import BinaryMachine, FailureMode
+python -m scripts.run_er2_llm_repair_selection --provider gemini --model gemini-3.6-flash --thinking-level low --seeds 0..9 --output-dir results/er2_repair_control
 
-env = BinaryMachine()
-env.reset(FailureMode.SENSOR_CORRUPTION)
-observation = env.step(1)       # Observation(x=1, o=0): agent-visible
-truth = env.get_ground_truth()  # evaluation only: Y=1, sensor is corrupted
+python -m scripts.run_er1_v2_er2_end_to_end --provider gemini --model gemini-3.6-flash --thinking-level low --seeds 0..9 --budget 8 --diagnosis-threshold 0.95 --max-decision-calls 9 --output-dir results/er1_v2_er2_end_to_end
 ```
 
-Diagnostic API example:
+These commands make live API calls and may encounter changing free-tier limits. Use `--preflight-only` on the ER-2 control or end-to-end command to validate prompts and permutations without creating a provider client.
 
-```python
-from epistemic_repair import Context, DiagnosticAction
+## Repository structure
 
-trusted = env.run_experiment(DiagnosticAction.USE_TRUSTED_SENSOR, x=1)
-changed = env.run_experiment(
-    DiagnosticAction.CHANGE_CONTEXT,
-    x=1,
-    context=Context.A,
-)
+```text
+epistemic_repair/
+  er1_v2/       stochastic investigation environment and runner
+  er2/          repair state, LLM selection, and held-out evaluation
+  evaluation/   calibration, comparison, and reporting utilities
+  llm/          provider-neutral interfaces and Gemini adapter
+  prompts/      versioned ER-0 and ER-1 prompts
+scripts/        demos, calibration, analysis, and live-run CLIs
+tests/          deterministic and mocked-provider test suite
+results/        committed calibration and experiment artifacts
 ```
 
-## Scope
-
-This repository contains the standalone deterministic ER-0 benchmark, the
-separate stochastic ER-1 diagnosis benchmark, and the minimal deterministic
-ER-2 repair-selection/evaluation layer plus a provider-neutral, externally
-diagnosed LLM repair-selection study. ER-2 executes explicit repairs only on
-its small predictive agent state; it is not coupled to ER-1 diagnosis
-uncertainty. No live provider is called automatically. Planned research stages,
-not implemented here, include:
-
-- diagnosis-to-repair integration under uncertain diagnoses; and
-- larger causal environments.
+The benchmark is intentionally small. It does not yet establish general performance across models, larger causal systems, or real-world repair tasks.
